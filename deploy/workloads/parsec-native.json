@@ -1,0 +1,64 @@
+{
+	"benchmark_name": "parsec-native",
+	"common_simulation_outputs": [
+		"uartlog"
+	],
+	"workloads": [
+		{
+			"name": "parsec-native-blackscholes",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-blackscholes-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-blackscholes.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-native-bodytrack",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-bodytrack-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-bodytrack.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-native-fluidanimate",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-fluidanimate-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-fluidanimate.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-native-freqmine",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-freqmine-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-freqmine.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-native-swaptions",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-swaptions-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-swaptions.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-native-x264",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-x264-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-x264.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-native-streamcluster",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-streamcluster-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-native-streamcluster.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		}
+	]
+}

@@ -1,3 +1,11 @@
+# NTNU FireSim Fork
+
+This fork is compatible with the original firesim and its documentation. Please follow the Getting Started guide at https://docs.fires.im for your setup. 
+
+The chipyard repository and its firemarshal repository are currently linked to our forks and contain the core and image configurations for our benchmarking needs. Follow the readme under target-design/chipyard/software/firemarshal to build the simulation images.
+
+A new run-workload.sh script is provided under deploy. This one needs a runtime configuration (e.g. rocket4\_1x.ini) and a workload configuration (e.g. spec2017-test.json) and will launch all jobs from the workload iterively over the supplied instances in the runtime configuration. This is especially useful if you have large workload configurations (e.g. spec2017 with 41 jobs) but not enough AWS limits to launch 41 instances.
+
 # FireSim: Easy-to-use, Scalable, FPGA-accelerated Cycle-accurate Hardware Simulation
 
 ![FireSim Documentation Status](https://readthedocs.org/projects/firesim/badge/)

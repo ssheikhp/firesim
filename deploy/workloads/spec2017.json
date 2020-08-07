@@ -1,0 +1,8 @@
+{
+	"benchmark_name": "spec2017",
+	"common_simulation_outputs": [
+		"uartlog"
+	],
+	"common_bootbinary": "../../../target-design/chipyard/software/firemarshal/images/spec2017-bin",
+	"common_rootfs": "../../../target-design/chipyard/software/firemarshal/images/spec2017.img"
+}

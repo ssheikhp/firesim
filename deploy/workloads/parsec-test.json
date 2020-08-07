@@ -1,0 +1,64 @@
+{
+	"benchmark_name": "parsec-test",
+	"common_simulation_outputs": [
+		"uartlog"
+	],
+	"workloads": [
+		{
+			"name": "parsec-test-blackscholes",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-blackscholes-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-blackscholes.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-test-bodytrack",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-bodytrack-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-bodytrack.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-test-fluidanimate",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-fluidanimate-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-fluidanimate.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-test-freqmine",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-freqmine-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-freqmine.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-test-swaptions",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-swaptions-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-swaptions.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-test-x264",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-x264-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-x264.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		},
+		{
+			"name": "parsec-test-streamcluster",
+			"bootbinary": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-streamcluster-bin",
+			"rootfs": "../../../target-design/chipyard/software/firemarshal/images/parsec-test-streamcluster.img",
+			"outputs": [
+				"/opt/parsec/output"
+			]
+		}
+	]
+}
