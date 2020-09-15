@@ -1,4 +1,5 @@
 //See LICENSE for license details
+#ifdef PLATFORM_zynq
 #ifndef RTLSIM
 #include "simif_zynq.h"
 #else
@@ -28,3 +29,5 @@ int main(int argc, char** argv) {
     firesim.run();
     return firesim.finish();
 }
+
+#endif //PLATFORM_zynq

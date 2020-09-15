@@ -133,7 +133,7 @@ vcs-debug: $(vcs_debug)
 ############################
 # Master Simulation Driver #
 ############################
-DRIVER_CXXOPTS ?= -O2
+DRIVER_CXXOPTS ?= -O2 -D PLATFORM_$(PLATFORM)
 
 $(OUTPUT_DIR)/$(DESIGN).chain: $(VERILOG)
 	mkdir -p $(OUTPUT_DIR)
@@ -150,6 +150,26 @@ $(f1): export LDFLAGS := $(LDFLAGS) $(common_ld_flags) -lfpga_mgmt
 
 # Compile Driver
 $(f1): $(HEADER) $(DRIVER_CC) $(DRIVER_H) $(midas_cc) $(midas_h) $(runtime_conf)
+	mkdir -p $(OUTPUT_DIR)/build
+	cp $(HEADER) $(OUTPUT_DIR)/build/
+	cp -f $(GENERATED_DIR)/$(CONF_NAME) $(OUTPUT_DIR)/runtime.conf
+	$(MAKE) -C $(simif_dir) f1 PLATFORM=f1 DESIGN=$(DESIGN) \
+	GEN_DIR=$(OUTPUT_DIR)/build OUT_DIR=$(OUTPUT_DIR) DRIVER="$(DRIVER_CC)" \
+	TOP_DIR=$(chipyard_dir)
+
+
+convey_dir = /opt/convey
+
+convey-app: export CXXFLAGS := $(CXXFLAGS) $(common_cxx_flags) $(DRIVER_CXXOPTS) -I$(fpga_dir)/sdk/userspace/include \
+	-I$(convey_dir)/include \
+	-I$(convey_dir)/pdk2/latest/wx-2000/include \
+	-I$(convey_dir)/driver_build
+# Statically link libfesvr to make it easier to distribute drivers to f1 instances
+convey-app: export LDFLAGS := $(LDFLAGS) $(common_ld_flags) -L$(convey_dir)/lib -l:libwx_runtime.so -L$(convey_dir)/pdk2/latest/wx-2000/lib -lcnyfwd
+
+
+# Compile Driver
+convey-app: $(HEADER) $(DRIVER_CC) $(DRIVER_H) $(midas_cc) $(midas_h) $(runtime_conf)
 	mkdir -p $(OUTPUT_DIR)/build
 	cp $(HEADER) $(OUTPUT_DIR)/build/
 	cp -f $(GENERATED_DIR)/$(CONF_NAME) $(OUTPUT_DIR)/runtime.conf
