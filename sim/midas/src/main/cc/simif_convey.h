@@ -14,13 +14,7 @@ class simif_convey_t: public virtual simif_t
 {
   public:
     simif_convey_t(int argc, char** argv);
-    virtual ~simif_convey_t() { }
-
-  private:
-    wdm_coproc_t m_coproc;
-    int fd;
-  
-  protected:
+    virtual ~simif_convey_t();
     virtual void write(size_t addr, uint32_t data);
     virtual uint32_t read(size_t addr);
     virtual ssize_t pull(size_t addr, char* data, size_t size){
@@ -33,10 +27,12 @@ class simif_convey_t: public virtual simif_t
       exit(-1);
       return 0;
     }
-    virtual size_t pread(size_t addr, char* data, size_t size) {
-      // Not supported
-      return 0;
-    }
+
+  private:
+    wdm_coproc_t m_coproc;
+    int fd;
+  
+  protected:
     void writeCSR(unsigned int regInd, uint64_t regValue);
     uint64_t readCSR(unsigned int regInd);
 };
