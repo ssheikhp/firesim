@@ -5,6 +5,7 @@
 
 #include "simif.h"
 #include <stdint.h>
+#include <stdio.h>
 extern "C"{
     #include <wdm_user.h>
 }
@@ -22,6 +23,16 @@ class simif_convey_t: public virtual simif_t
   protected:
     virtual void write(size_t addr, uint32_t data);
     virtual uint32_t read(size_t addr);
+    virtual ssize_t pull(size_t addr, char* data, size_t size){
+      fprintf(stderr, "DMA not supported \n");
+      exit(-1);
+      return 0;
+    }
+    virtual ssize_t push(size_t addr, char* data, size_t size){
+      fprintf(stderr, "DMA not supported \n");
+      exit(-1);
+      return 0;
+    }
     virtual size_t pread(size_t addr, char* data, size_t size) {
       // Not supported
       return 0;
