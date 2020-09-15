@@ -163,7 +163,8 @@ convey_dir = /opt/convey
 convey-app: export CXXFLAGS := $(CXXFLAGS) $(common_cxx_flags) $(DRIVER_CXXOPTS) -I$(fpga_dir)/sdk/userspace/include \
 	-I$(convey_dir)/include \
 	-I$(convey_dir)/pdk2/latest/wx-2000/include \
-	-I$(convey_dir)/driver_build
+	-I$(convey_dir)/driver_build \
+	-D__STDC_FORMAT_MACROS
 # Statically link libfesvr to make it easier to distribute drivers to f1 instances
 convey-app: export LDFLAGS := $(LDFLAGS) $(common_ld_flags) -L$(convey_dir)/lib -l:libwx_runtime.so -L$(convey_dir)/pdk2/latest/wx-2000/lib -lcnyfwd
 
