@@ -12,7 +12,7 @@ extern "C"{
 class simif_convey_t: public virtual simif_t
 {
   public:
-    simif_convey_t();
+    simif_convey_t(int argc, char** argv);
     virtual ~simif_convey_t() { }
 
   private:

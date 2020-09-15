@@ -17,7 +17,7 @@ extern "C"{
 
 #define CSR_ADAPT_AXI 8
 
-simif_convey_t::simif_convey_t() {
+simif_convey_t::simif_convey_t(int argc, char** argv) {
   m_coproc = WDM_INVALID;
   m_coproc = wdm_reserve(WDM_CPID_ANY, NULL);
   if (m_coproc == WDM_INVALID) {

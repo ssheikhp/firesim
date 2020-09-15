@@ -19,7 +19,7 @@ class firesim_convey_t:
 #ifdef RTLSIM
         firesim_convey_t(int argc, char** argv): firesim_top_t(argc, argv) {};
 #else
-        firesim_convey_t(int argc, char** argv): simif_convey_t(), firesim_top_t(argc, argv) {};
+        firesim_convey_t(int argc, char** argv): simif_convey_t(argc, argv), firesim_top_t(argc, argv) {};
 #endif
 };
 
