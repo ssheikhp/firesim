@@ -3,14 +3,14 @@
 #ifndef RTLSIM
 #include "simif_convey.h"
 #else
-#include "simif_emul.h"
+#include "simif_convey_emul.h"
 #endif
 #include "firesim_top.h"
 
 // top for RTL sim
 class firesim_convey_t:
 #ifdef RTLSIM
-    public simif_emul_t, public firesim_top_t
+    public simif_convey_emul_t, public firesim_top_t
 #else
     public simif_convey_t, public firesim_top_t
 #endif

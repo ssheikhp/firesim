@@ -1,4 +1,3 @@
-#ifdef PLATFORM_f1
 #include "simif_f1.h"
 #include <cassert>
 
@@ -212,5 +211,3 @@ uint32_t simif_f1_t::is_write_ready() {
     return value & 0xFFFFFFFF;
 #endif
 }
-
-#endif //PLATFORM_f1
