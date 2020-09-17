@@ -170,7 +170,7 @@ uint64_t simif_convey_t::readCSR(unsigned int regInd) {
 
 uint32_t simif_convey_t::read(size_t off)
 {
-    uint64_t tmp = (((uint64_t)(0x00000000UL | off)) << 32);
+    uint64_t tmp = (((uint64_t)(0x00000000UL | off*4)) << 32);
     writeCSR(CSR_ADAPT_AXI, tmp);
     uint64_t result = readCSR(CSR_ADAPT_AXI);
 //    printf("R %x - %x\n", off, (uint32_t)result);
@@ -180,6 +180,6 @@ uint32_t simif_convey_t::read(size_t off)
 void simif_convey_t::write(size_t off, uint32_t word)
 {
 //    printf("W %x - %x\n", off, word);
-    uint64_t tmp = (((uint64_t)(0x80000000UL | off)) << 32) | word;
+    uint64_t tmp = (((uint64_t)(0x80000000UL | off*4)) << 32) | word;
     writeCSR(CSR_ADAPT_AXI, tmp);
 }
