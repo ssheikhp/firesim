@@ -116,15 +116,15 @@ simif_convey_t::~simif_convey_t() {
       exit(-1);
     }
 
-    if(wdm_detach(m_coproc)!=0){
-      fprintf(stderr, "Detach Failed\n");
-      exit(-1);
-    }
-
-    if(wdm_release(m_coproc)!=0){
-      fprintf(stderr, "Release Failed\n");
-      exit(-1);
-    }
+//    if(wdm_detach(m_coproc)!=0){
+//      fprintf(stderr, "Detach Failed\n");
+//      exit(-1);
+//    }
+//
+//    if(wdm_release(m_coproc)!=0){
+//      fprintf(stderr, "Release Failed\n");
+//      exit(-1);
+//    }
 }
 
 void simif_convey_t::writeCSR(unsigned int regInd, uint64_t regValue) {
