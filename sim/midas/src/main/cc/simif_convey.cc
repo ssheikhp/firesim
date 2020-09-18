@@ -108,23 +108,23 @@ simif_convey_t::simif_convey_t(int argc, char** argv) {
 
 simif_convey_t::~simif_convey_t() {
     // make dispatch finish
-    writeCSR(0, 0);
-    assert(readCSR(0)==0);
+//    writeCSR(0, 0);
+//    assert(readCSR(0)==0);
 
     if(close(fd)!=0){
       fprintf(stderr, "fd close Failed\n");
       exit(-1);
     }
 
-//    if(wdm_detach(m_coproc)!=0){
-//      fprintf(stderr, "Detach Failed\n");
-//      exit(-1);
-//    }
-//
-//    if(wdm_release(m_coproc)!=0){
-//      fprintf(stderr, "Release Failed\n");
-//      exit(-1);
-//    }
+    if(wdm_detach(m_coproc)!=0){
+      fprintf(stderr, "Detach Failed\n");
+      exit(-1);
+    }
+
+    if(wdm_release(m_coproc)!=0){
+      fprintf(stderr, "Release Failed\n");
+      exit(-1);
+    }
 }
 
 void simif_convey_t::writeCSR(unsigned int regInd, uint64_t regValue) {
