@@ -309,6 +309,8 @@ class WolverineShim(implicit p: Parameters) extends PlatformShim {
           mem_axi_error_next := eBURST
         }.elsewhen(mem_axi.aw.bits.size =/= "b011".U /*8 bytes*/) {
           mem_axi_error_next := eSIZE
+        }.elsewhen(mem_axi.aw.bits.len > 7.U /*8 beats*/) {
+          mem_axi_error_next := eLEN
         }
       }
 

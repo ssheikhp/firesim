@@ -99,7 +99,9 @@ class WolverineConfig extends Config(new Config((site, here, up) => {
   case HostMemChannelKey => HostMemChannelParams(
     size      = 0x100000000L, // 4 GiB
     beatBytes = 8,
-    idBits    = 16)
+    idBits    = 16,
+    maxXferBytes = 64
+  )
   case HostMemNumChannels => 1 // 1 channel for now
 }) ++ new SimConfig)
 
