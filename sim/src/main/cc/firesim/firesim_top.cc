@@ -8,6 +8,7 @@
 #include "bridges/simplenic.h"
 #include "bridges/blockdev.h"
 #include "bridges/tracerv.h"
+#include "bridges/tracers.h"
 #include "bridges/groundtest.h"
 #include "bridges/autocounter.h"
 #include "bridges/dromajo.h"
@@ -246,6 +247,13 @@ firesim_top_t::firesim_top_t(int argc, char** argv)
     #ifdef SIMPLENICBRIDGEMODULE_7_PRESENT
     SIMPLENICBRIDGEMODULE_7_substruct_create;
     add_bridge_driver(new simplenic_t(this, args, SIMPLENICBRIDGEMODULE_7_substruct, 7, SIMPLENICBRIDGEMODULE_7_DMA_ADDR));
+    #endif
+#endif
+
+#ifdef TRACERSBRIDGEMODULE_struct_guard
+    #ifdef TRACERSBRIDGEMODULE_0_PRESENT
+    TRACERSBRIDGEMODULE_0_substruct_create;
+    add_bridge_driver(new tracers_t(this, TRACERSBRIDGEMODULE_0_substruct, 0));
     #endif
 #endif
 
