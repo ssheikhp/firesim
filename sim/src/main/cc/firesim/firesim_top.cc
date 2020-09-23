@@ -504,10 +504,11 @@ int firesim_top_t::exit_code(){
 
 
 void firesim_top_t::run() {
+    printf("init fpga models\n");
     for (auto &e: fpga_models) {
         e->init();
     }
-
+    printf("init bridges\n");
     for (auto &e: bridges) {
         e->init();
     }

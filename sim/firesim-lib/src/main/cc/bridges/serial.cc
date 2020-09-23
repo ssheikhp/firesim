@@ -76,9 +76,11 @@ void serial_t::go() {
 void serial_t::send() {
     if(fesvr->data_available()){
         int space = read(this->mmio_addrs->in_space);
-        for(int i=0; i<space && fesvr->data_available(); i++) {
+        int i;
+        for(i=0; i<space && fesvr->data_available(); i++) {
             write(this->mmio_addrs->in, fesvr->recv_word());
         }
+        printf("serial sent %d\n", i);
     }
 }
 

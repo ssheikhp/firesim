@@ -25,6 +25,7 @@ class tracers_t: public bridge_driver_t
 
     private:
         TRACERSBRIDGEMODULE_struct * mmio_addrs;
+        int invalid_cycles = 0;
 };
 #endif // TRACERSBRIDGEMODULE_struct_guard
 

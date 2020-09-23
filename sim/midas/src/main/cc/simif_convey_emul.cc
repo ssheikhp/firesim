@@ -104,13 +104,13 @@ uint32_t simif_convey_emul_t::read(size_t off)
     uint64_t tmp = (((uint64_t)(0x00000000UL | off*4)) << 32);
     writeCSR(CSR_ADAPT_AXI, tmp);
     uint64_t result = readCSR(CSR_ADAPT_AXI);
-    printf("R %d - %x\n", off, (uint32_t)result);
+//    printf("R %d - %x\n", off, (uint32_t)result);
     return result;
 }
 
 void simif_convey_emul_t::write(size_t off, uint32_t word)
 {
-    printf("W %d - %x\n", off, word);
+//    printf("W %d - %x\n", off, word);
     uint64_t tmp = (((uint64_t)(0x80000000UL | off*4)) << 32) | word;
     writeCSR(CSR_ADAPT_AXI, tmp);
 }
