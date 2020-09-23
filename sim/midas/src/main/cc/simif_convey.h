@@ -27,10 +27,13 @@ class simif_convey_t: public virtual simif_t
       exit(-1);
       return 0;
     }
+//    virtual void write_mem_chunk(size_t addr, mpz_t& value, size_t bytes);
 
   private:
     wdm_coproc_t m_coproc;
     int fd;
+  //allocate memmory
+  uint64_t *cp_base;
   
   protected:
     void writeCSR(unsigned int regInd, uint64_t regValue);

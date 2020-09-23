@@ -21,7 +21,7 @@ tracers_t::~tracers_t() {
 
 void tracers_t::init() {
     printf("tracers init\n");
-    write(this->mmio_addrs->traceActive, true);
+    write(this->mmio_addrs->traceActive, false);
     write(this->mmio_addrs->initDone, true);
 }
 
@@ -29,11 +29,11 @@ void tracers_t::tick() {
     uint32_t li = read(this->mmio_addrs->lastInstruction);
     bool valid = li & 0x1;
     uint32_t addr = li ^ valid;
-    if(valid){
-        printf("tracers %x\n", addr);
-    } else{
-        printf("tracers invalid\n");
-    }
+//    if(valid){
+//        printf("tracers %x\n", addr);
+//    } else{
+//        printf("tracers invalid\n");
+//    }
 }
 
 

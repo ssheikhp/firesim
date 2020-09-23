@@ -44,8 +44,14 @@ class firesim_fesvr_t : public htif_t
         void reset();
         void load_program() {
             wait(); // Switch back to commit all pending requests
+            printf("fesvr - loading program\n");
 //            is_loadmem = true;
             htif_t::load_program();
+//            while(has_loadmem_reqs()){
+//                wait();
+//                printf("processing loadmem\n");
+//            }
+//            printf("fesvr - finished loading!\n");
 //            is_loadmem = false;
         }
 

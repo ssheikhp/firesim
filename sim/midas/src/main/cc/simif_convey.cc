@@ -70,19 +70,17 @@ simif_convey_t::simif_convey_t(int argc, char** argv) {
   printf("done\n");
 
   printf("allocate memmory...");
-  //allocate memmory
-  uint64_t *cp_a1;
   // allocate 1GB alligned to 64bytes
-  int aloc_resp = wdm_posix_memalign(m_coproc, (void**)&cp_a1, 64, 0x40000000UL);
+  int aloc_resp = wdm_posix_memalign(m_coproc, (void**)&cp_base, 64, 0x40000000UL);
   printf("response: %d\n", aloc_resp);
-  printf("cp_a1: %p\n", (void *)cp_a1);
+  printf("cp_base: %p\n", (void *)cp_base);
 
   wdm_dispatch_t ds;
   memset((void *)&ds, 0, sizeof(ds));
   uint64_t args[1];
   uint64_t resp[1];
   // write base of allocated region
-  args[0] = (uint64_t) cp_a1;
+  args[0] = (uint64_t) cp_base;
   ds.ae[0].aeg_ptr_s = args;
   ds.ae[0].aeg_cnt_s = 1;
   ds.ae[0].aeg_base_s = 1;
@@ -103,13 +101,18 @@ simif_convey_t::simif_convey_t(int argc, char** argv) {
   printf("...done\n");
   // address was written
   uint64_t badr_csr_value = readCSR(1);
-  printf("badr_csr_value: %p cp_a1: %p\n", (void *)badr_csr_value, (void *)cp_a1);
+  printf("badr_csr_value: %p cp_base: %p\n", (void *)badr_csr_value, (void *)cp_base);
 }
 
 simif_convey_t::~simif_convey_t() {
     // make dispatch finish
 //    writeCSR(0, 0);
 //    assert(readCSR(0)==0);
+//        uint32_t * dst;
+//      dst = (uint32_t*)cp_base;
+//      for (size_t i = 0 ; i < 0x1000 ; i++) {
+//        printf("%p - %x\n", &dst[i], dst[i]);
+//      }
 
     if(close(fd)!=0){
       fprintf(stderr, "fd close Failed\n");
@@ -173,13 +176,29 @@ uint32_t simif_convey_t::read(size_t off)
     uint64_t tmp = (((uint64_t)(0x00000000UL | off*4)) << 32);
     writeCSR(CSR_ADAPT_AXI, tmp);
     uint64_t result = readCSR(CSR_ADAPT_AXI);
-//    printf("R %x - %x\n", off, (uint32_t)result);
+//    printf("R %d - %x\n", off, (uint32_t)result);
     return result;
 }
 
 void simif_convey_t::write(size_t off, uint32_t word)
 {
-//    printf("W %x - %x\n", off, word);
+    printf("W %d - %x\n", off, word);
     uint64_t tmp = (((uint64_t)(0x80000000UL | off*4)) << 32) | word;
     writeCSR(CSR_ADAPT_AXI, tmp);
 }
+
+
+//void simif_convey_t::write_mem_chunk(size_t addr, mpz_t& value, size_t bytes) {
+//  uint32_t * dst;
+//  dst = (uint32_t*)(((void *)cp_base)+addr);
+//  printf("write_mem_chunk to %x - %p - %d\n", addr, dst, bytes);
+//  size_t size;
+//  data_t* data = (data_t*)mpz_export(NULL, &size, -1, sizeof(data_t), 0, 0, value);
+////  if(wdm_memcpy(m_coproc, dst, data, bytes)){
+////    fprintf(stderr, "wdm_memcpy failed\n");
+////    exit(-1);
+////  }
+//  for (size_t i = 0 ; i < bytes ; i++) {
+//    dst[i] = i < size ? data[i] : 0;
+//  }
+//}

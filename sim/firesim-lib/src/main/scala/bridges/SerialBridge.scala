@@ -39,7 +39,7 @@ class SerialBridgeModule(val memoryRegionName: String)(implicit p: Parameters)
     val hPort = IO(HostPort(new SerialBridgeTargetIO))
 
     val serialBits = testchipip.SerialAdapter.SERIAL_IF_WIDTH
-    val inBuf  = Module(new Queue(UInt(serialBits.W), 16))
+    val inBuf  = Module(new Queue(UInt(serialBits.W), 256))
     val outBuf = Module(new Queue(UInt(serialBits.W), 16))
     val tokensToEnqueue = RegInit(0.U(32.W))
 
@@ -58,12 +58,12 @@ class SerialBridgeModule(val memoryRegionName: String)(implicit p: Parameters)
     outBuf.io.enq <> target.out
     outBuf.io.enq.valid := target.out.valid && tFire
 
-    genWOReg(inBuf.io.enq.bits, "in_bits")
-    Pulsify(genWORegInit(inBuf.io.enq.valid, "in_valid", false.B), pulseLength = 1)
-    genROReg(inBuf.io.enq.ready, "in_ready")
-    genROReg(outBuf.io.deq.bits, "out_bits")
-    genROReg(outBuf.io.deq.valid, "out_valid")
-    Pulsify(genWORegInit(outBuf.io.deq.ready, "out_ready", false.B), pulseLength = 1)
+    genROReg(inBuf.entries.U-inBuf.io.count, "in_space")
+    attachDecoupledSink(inBuf.io.enq, "in")
+
+
+    genROReg(outBuf.io.count, "out_count")
+    attachDecoupledSource(outBuf.io.deq, "out")
 
     val stepSize = Wire(UInt(32.W))
     val start = Wire(Bool())

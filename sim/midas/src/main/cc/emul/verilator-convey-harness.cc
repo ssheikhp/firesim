@@ -26,7 +26,7 @@ csr_res c_res;
 
 #define MEM_SIZE 0x40000000ULL
 #define MEM_BASE 0x20000000ULL
-#define MEM_CYCLES 10
+#define MEM_CYCLES 50
 
 typedef struct{
     int cycle;
