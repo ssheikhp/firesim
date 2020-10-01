@@ -66,8 +66,20 @@ class TracerSBridgeModule(key: TracerVKey)(implicit p: Parameters) extends Bridg
 
     val traceActive    = genWORegInit(Wire(Bool()), "traceActive", false.B)
 
-    require(key.vecSize == 1)
-    val lastInstruction = Reg(new DeclockedTracedInstruction(traces.head.widths))
+    val sampleStep    = genWORegInit(Wire(UInt(32.W)), "sampleStep", 10000.U)
+    val nextSample = RegInit(100.U(cycleCountWidth.W))
+    attach(nextSample(cycleCountWidth-1, 32), "nextSample_upper", ReadOnly)
+    attach(nextSample(31, 0), "nextSample_lower", ReadOnly)
+
+    val insnWidths = traces.head.widths
+    val numInsns = traces.length
+    val lastInstruction = Reg(new DeclockedTracedInstruction(insnWidths))
+    val lastInstructionCycle = RegInit(0.U(cycleCountWidth.W))
+
+    // block on next valid instruction
+    val blockOnNextValid = RegInit(true.B)
+    val block = RegInit(false.B)
+    attach(block, "block", ReadOnly)
 
     val insnRead = Wire(Decoupled(UInt(32.W)))
     attachDecoupledSource(insnRead, "lastInstruction")
@@ -75,9 +87,15 @@ class TracerSBridgeModule(key: TracerVKey)(implicit p: Parameters) extends Bridg
     insnRead.bits := lastInstruction.iaddr | lastInstruction.valid
     when(insnRead.fire){
       lastInstruction.valid := false.B
+      when(!lastInstruction.valid){
+        blockOnNextValid := true.B
+      }
+      // unblock
+      block := false.B
     }
     attach(lastInstruction.valid, "li_valid", ReadOnly)
-    attach(lastInstruction.iaddr, "li_iaddr", ReadOnly)
+    attach(lastInstruction.iaddr(pcWidth-1,32), "li_iaddr_upper", ReadOnly)
+    attach(lastInstruction.iaddr(31,0), "li_iaddr_lower", ReadOnly)
     attach(lastInstruction.insn, "li_insn", ReadOnly)
     lastInstruction.wdata.map(w => attach(w, "li_wdata", ReadOnly))
     attach(lastInstruction.priv, "li_priv", ReadOnly)
@@ -85,17 +103,34 @@ class TracerSBridgeModule(key: TracerVKey)(implicit p: Parameters) extends Bridg
     attach(lastInstruction.interrupt, "li_interrupt", ReadOnly)
     attach(lastInstruction.cause, "li_cause", ReadOnly)
     attach(lastInstruction.tval, "li_tval", ReadOnly)
+    attach(lastInstructionCycle(cycleCountWidth-1, 32), "li_cycle_upper", ReadOnly)
+    attach(lastInstructionCycle(31, 0), "li_cycle_lower", ReadOnly)
 
-    val tFireHelper = DecoupledHelper((!lastInstruction.valid || !traceActive), hPort.toHost.hValid, hPort.fromHost.hReady, initDone)
+    val tFireHelper = DecoupledHelper(!(block && traceActive), hPort.toHost.hValid, hPort.fromHost.hReady, initDone)
 
     hPort.toHost.hReady := tFireHelper.fire(hPort.toHost.hValid)
     hPort.fromHost.hValid := tFireHelper.fire(hPort.fromHost.hReady)
 
     val trace_cycle_counter = RegInit(0.U(cycleCountWidth.W))
+    attach(trace_cycle_counter(cycleCountWidth-1, 32), "trace_cycle_upper", ReadOnly)
+    attach(trace_cycle_counter(31, 0), "trace_cycle_lower", ReadOnly)
+
     when (tFireHelper.fire) {
-      trace_cycle_counter := trace_cycle_counter + 1.U
-      when(traces.head.valid){
-        lastInstruction := traces.head
+      val trace_cycle_next = trace_cycle_counter + 1.U
+      trace_cycle_counter := trace_cycle_next
+      when(trace_cycle_next >= nextSample && traceActive){
+        block := true.B
+        nextSample := nextSample + sampleStep
+      }
+      // only write to register if valid
+      when(traces.map(_.valid).reduce(_ || _) && traceActive){
+        // select last (newest) valid instruction
+        lastInstruction := PriorityMux(traces.reverse.map(a => a.valid -> a))
+        lastInstructionCycle := trace_cycle_counter
+        when(blockOnNextValid){
+          blockOnNextValid := false.B
+          block := true.B
+        }
       }
     }
 
