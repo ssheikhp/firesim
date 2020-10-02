@@ -14,6 +14,9 @@ DESIGN ?=
 # A string generated from the config names to uniquely indentify the simulator
 name_tuple ?=
 
+# valid frequency values in modified pdk (in pdk_clock.v):
+# 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150, 175, 200, 225, 250
+FPGA_FREQUNCY ?= 50
 
 fpga_dir = $(firesim_base_dir)/../platforms/convey
 #############################
@@ -44,6 +47,6 @@ replace-rtl: $(fpga_v)
 
 # Runs a local fpga-bitstream build.
 fpga: $(fpga_v)
-	make -C $(fpga_work_dir)/phys pers
+	make -C $(fpga_work_dir)/phys pers CLK_PERS_FREQ=$(FPGA_FREQUNCY)
 
 .PHONY: fpga
