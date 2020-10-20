@@ -524,11 +524,26 @@ void firesim_top_t::run() {
     // Assert reset T=0 -> 50
     target_reset(50);
 
+    BRIDGEMONITOR_0_substruct_create
+    uint64_t previous_tcycle = actual_tcycle();
+
     while (!simulation_complete() && !has_timed_out()) {
         run_scheduled_tasks();
         step(get_largest_stepsize(), false);
         while(!done() && !simulation_complete()){
             for (auto &e: bridges) e->tick();
+
+            uint64_t tcycle = actual_tcycle();
+            if(tcycle == previous_tcycle){
+                uint32_t blame = read(BRIDGEMONITOR_0_substruct->BLAME_HOST);
+                printf("target did not progress! cycle %llu\n", tcycle);
+                for(int i=0; i<MONITOR_BRIDGE_CNT; i++){
+                    if((blame>>i)&1){
+                        printf("blaming %s\n", monitor_causes[i]);
+                    }
+                }
+            }
+            previous_tcycle = tcycle;
         }
     }
 
