@@ -343,7 +343,7 @@ class WolverineShim(implicit p: Parameters) extends PlatformShim {
             mem_axi_error_next := eLEN
           }
           io.mcReqSize := 3.U
-          io.mcReqAddr := mem_alloc_addr + Cat(mem_axi.ar.bits.addr(31, 3), 0.U(3.W)) - mem_ram_base.U
+          io.mcReqAddr := mem_alloc_addr + mem_axi.ar.bits.addr - mem_ram_base.U
           //        io.mcReqRtnCtl := Cat(mem_axi.ar.bits.echo(AXI4FragLast), mem_axi.ar.bits.id)
           io.mcReqRtnCtl := mem_axi.ar.bits.id
         }
