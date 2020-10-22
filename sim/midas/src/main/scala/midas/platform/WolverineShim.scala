@@ -166,6 +166,7 @@ class WolverineShim(implicit p: Parameters) extends PlatformShim {
     val mem_write_id = RegInit(0.U)
     val mem_write_echo = RegInit(0.U)
     val mem_write_len = RegInit(0.U)
+    val mem_write_size = RegInit(0.U)
     val mem_request_state = RegInit(sIDLE)
 
     val adapt_addr = RegInit(0.U)
@@ -307,7 +308,7 @@ class WolverineShim(implicit p: Parameters) extends PlatformShim {
       when(mem_axi.aw.valid) {
         when(mem_axi.aw.bits.burst =/= "b01".U /*INC*/) {
           mem_axi_error_next := eBURST
-        }.elsewhen(mem_axi.aw.bits.size =/= "b011".U /*8 bytes*/) {
+        }.elsewhen(mem_axi.aw.bits.size =/= "b011".U /*8 bytes*/ && mem_axi.aw.bits.len =/= 0.U) {
           mem_axi_error_next := eSIZE
         }.elsewhen(mem_axi.aw.bits.len > 7.U /*8 beats*/) {
           mem_axi_error_next := eLEN
@@ -353,6 +354,7 @@ class WolverineShim(implicit p: Parameters) extends PlatformShim {
           mem_request_state := sWRITE_DATA
           mem_write_addr := mem_axi.aw.bits.addr
           mem_write_id := mem_axi.aw.bits.id
+          mem_write_size := mem_axi.aw.bits.size
           //        mem_write_echo := mem_axi.aw.bits.echo(AXI4FragLast)
           mem_write_len := mem_axi.aw.bits.len
         }
@@ -363,21 +365,29 @@ class WolverineShim(implicit p: Parameters) extends PlatformShim {
           when(mem_write_len === 0.U){
             io.mcReqCmd := 2.U // write
             io.mcReqSCmd := 0.U // 1 beat
-            when(BitPat("b11111111") === mem_axi.w.bits.strb){
-              io.mcReqSize := 3.U // 8 bytes
-              io.mcReqData := mem_axi.w.bits.data
-              io.mcReqAddr := mem_alloc_addr + mem_write_addr - mem_ram_base.U
-            }.elsewhen(BitPat("b00001111") === mem_axi.w.bits.strb){
+            when(BitPat("b011") === mem_write_size){ // 8 bytes
+              when(BitPat("b11111111") === mem_axi.w.bits.strb){
+                io.mcReqSize := 3.U // 8 bytes
+                io.mcReqData := mem_axi.w.bits.data
+                io.mcReqAddr := mem_alloc_addr + mem_write_addr - mem_ram_base.U
+              }.otherwise {
+                mem_axi_error_next := eMASK
+                io.mcReqValid := false.B
+              }
+            }.elsewhen(BitPat("b010") === mem_write_size){ // 4 bytes
               io.mcReqSize := 2.U // 4 bytes
-              io.mcReqData := mem_axi.w.bits.data(31,0)
-              io.mcReqAddr := mem_alloc_addr + mem_write_addr - mem_ram_base.U
-            }.elsewhen(BitPat("b11110000") === mem_axi.w.bits.strb){
-              io.mcReqSize := 2.U // 4 bytes
-              io.mcReqData := mem_axi.w.bits.data(63,32)
-              io.mcReqAddr := mem_alloc_addr + mem_write_addr - mem_ram_base.U + 4.U
+              when(BitPat("b00001111") === mem_axi.w.bits.strb){
+                io.mcReqData := mem_axi.w.bits.data(31,0)
+                io.mcReqAddr := mem_alloc_addr + mem_write_addr - mem_ram_base.U
+              }.elsewhen(BitPat("b11110000") === mem_axi.w.bits.strb){
+                io.mcReqData := mem_axi.w.bits.data(63,32)
+                io.mcReqAddr := mem_alloc_addr + mem_write_addr - mem_ram_base.U + 4.U
+              }.otherwise{
+                mem_axi_error_next := eMASK
+                io.mcReqValid := false.B
+              }
             }.otherwise{
-              mem_axi_error_next := eMASK
-              io.mcReqValid := false.B
+              mem_axi_error_next := eSIZE
             }
           }.otherwise{
             io.mcReqCmd := 6.U // write multi

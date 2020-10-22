@@ -42,6 +42,8 @@ char * mem = NULL;
 int beat = 0;
 int cycle = 0;
 std::deque<mem_request> * queue = NULL;
+bool mc_res_stall = true;
+int mc_res_stall_packets = 0;
 
 void tick(wolverine_interface* wi) {
   // init memory stuff
@@ -80,7 +82,14 @@ void tick(wolverine_interface* wi) {
     top->io_mcResData = 0; //mc_res_data
     top->io_mcResRtnCtl = 0; //mc_res_rtnctl
 
-    if((!queue->empty()) && queue->front().cycle <=cycle){
+    // can send up to 8 packets after stall
+    if(!mc_res_stall){
+        mc_res_stall_packets = 8;
+    }
+    bool can_respond = !mc_res_stall || mc_res_stall_packets>0;
+
+    if((!queue->empty()) && queue->front().cycle <=cycle && can_respond){
+        mc_res_stall_packets--;
         mem_request mr = queue->front();
 
 //        printf("MEMORY PROCESSING:\n");
@@ -206,6 +215,7 @@ void tick(wolverine_interface* wi) {
 //        printf("mr.data: %lx\n", mr.data);
         queue->push_back(mr);
     }
+    mc_res_stall = top->io_mcResStall;
     cycle++;
 
 
