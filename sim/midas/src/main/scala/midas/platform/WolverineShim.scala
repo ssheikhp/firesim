@@ -6,10 +6,13 @@ package platform
 import chisel3._
 import chisel3.util._
 import junctions._
-import freechips.rocketchip.config.{Parameters}
+import freechips.rocketchip.config.Parameters
 import freechips.rocketchip.diplomacy.{LazyModule, LazyModuleImp}
-
+import freechips.rocketchip.util.HeterogeneousBag
+import midas.widgets.CppGenerationUtils.genMacro
 import midas.widgets.CtrlNastiKey
+
+import scala.collection.mutable
 
 // response bundle for return read data or write completes (?)
 class ConveyMemResponse(val rtnCtlBits: Int, val dataBits: Int) extends Bundle {
@@ -109,6 +112,12 @@ class TopWrapperInterface(val numMemPorts: Int, val rtnctl: Int) extends Bundle 
 }
 
 class WolverineShim(implicit p: Parameters) extends PlatformShim {
+  val wsb = new StringBuilder
+  override def genHeader(sb: StringBuilder, target: String): Unit = {
+    super.genHeader(sb, target)
+    sb.append("\n// Wolverine adapter CSRs\n")
+    sb.append(wsb)
+  }
   lazy val module = new LazyModuleImp(this) {
     val numMemPorts: Int = 1
     val idBits: Int = 32
@@ -293,6 +302,76 @@ class WolverineShim(implicit p: Parameters) extends PlatformShim {
       //    dontTouch(mem_axi)
 
       val mem_axi = master_axi
+
+      var csr_index = 32
+      val generateCSRread = (dt: UInt, name: String) => {
+        if(!name.contains("echo") && !name.contains("user")) {
+          when(io.csrReadAck && csrReadAddr === csr_index.U) {
+            io.csrReadData := dt
+          }
+          wsb.append(genMacro("CSR_" + name, csr_index.toString))
+          wsb.append(genMacro("CSR_" + name + "_width", dt.widthOption.getOrElse(64).toString))
+          dt.suggestName(name)
+//          dontTouch(dt)
+          csr_index += 1
+        }
+      }
+      val length = 16
+      val generateMem = (dt: UInt, wi: UInt) => {
+        val mem = SyncReadMem(length, dt.cloneType)
+        mem(wi) := WireInit(dt)
+        mem
+      } : SyncReadMem[UInt]
+      val read_index_reg = RegInit(0.U(log2Ceil(length).W))
+      when(io.csrAddr === csr_index.U && io.csrWrValid){
+        read_index_reg := io.csrWrData
+      }
+      generateCSRread(read_index_reg, "read_index_reg")
+      val read_index = WireInit(read_index_reg)
+      val time_step = RegInit(0.U(64.W))
+      time_step := time_step + 1.U
+      generateCSRread(time_step, "time_step")
+      mem_axi.elements.foreach{ case (bundleName, bd_data) => {
+        val data = WireInit(bd_data)
+        val mems_data = mutable.Map.empty[String, SyncReadMem[UInt]] //SyncReadMem(length, data.cloneType)
+        val mem_time = SyncReadMem(length, time_step.cloneType)
+        data match {
+          case r: ReadyValidIO[Bundle] => {
+            val (write_index_reg, _) = Counter(r.fire(), length)
+            when(r.fire()){
+              mems_data(bundleName+"_ready") = generateMem(r.ready, write_index_reg)
+              mems_data(bundleName+"_valid") = generateMem(r.valid, write_index_reg)
+              r.bits.elements.foreach{case (name, dt) => {
+                dt match {
+                  case d: UInt => mems_data(bundleName+"_"+name) = generateMem(d, write_index_reg)
+                  case _ => println(f"skipping $name")
+                }
+              }}
+              mem_time(write_index_reg) := time_step
+            }
+          }
+          case _ => print(f"$bundleName is not ReadyValidIO")
+        }
+        // recorded data
+        mems_data.foreach{ case (name, mem) => {
+          generateCSRread(mem.read(read_index), name)
+        }}
+        generateCSRread(mem_time.read(read_index), bundleName+"_time_step")
+        // current data
+        data match {
+          case r: ReadyValidIO[Bundle] => {
+            generateCSRread(r.ready, bundleName+"_current_ready")
+            generateCSRread(r.valid, bundleName+"_current_valid")
+            r.bits.elements.foreach{case (name, dt) => {
+              dt match {
+                case d: UInt => generateCSRread(d, bundleName+"_current_"+name)
+                case _ => println(f"skipping $name")
+              }
+            }}
+          }
+          case _ => print(f"$bundleName is not ReadyValidIO[Bundle]")
+        }
+      }}
 
 
       // supports only single beat 1-8byte transactions for now
