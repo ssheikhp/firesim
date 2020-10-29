@@ -38,7 +38,7 @@ TARGET_LD_FLAGS ?=
 
 simif_dir = $(firesim_base_dir)/midas/src/main/cc
 midas_h  = $(shell find $(simif_dir) -name "*.h")
-midas_cc = $(shell find $(simif_dir) -name "*.cc")
+midas_cc = $(shell find $(simif_dir) -name "*.cc") $(shell find $(simif_dir)/vcd-writer -name "*.cpp")
 
 common_cxx_flags := $(TARGET_CXX_FLAGS) -Wno-unused-variable
 common_ld_flags := $(TARGET_LD_FLAGS) -lrt
@@ -86,7 +86,7 @@ conf: $(fame_annos)
 ####################################
 
 VERILATOR_CXXOPTS ?= -O0
-VERILATOR_MAKEFLAGS ?= -j8 VM_PARALLEL_BUILDS=1
+VERILATOR_MAKEFLAGS ?= -j16 VM_PARALLEL_BUILDS=1
 
 verilator = $(GENERATED_DIR)/V$(DESIGN)
 verilator_debug = $(GENERATED_DIR)/V$(DESIGN)-debug

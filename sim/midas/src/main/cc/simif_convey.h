@@ -15,6 +15,7 @@ class simif_convey_t: public virtual simif_t
   public:
     simif_convey_t(int argc, char** argv);
     virtual ~simif_convey_t();
+    virtual int finish();
     virtual void write(size_t addr, uint32_t data);
     virtual uint32_t read(size_t addr);
     virtual ssize_t pull(size_t addr, char* data, size_t size){

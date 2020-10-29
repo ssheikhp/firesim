@@ -1,6 +1,7 @@
 midas_dir = $(abspath .)
 util_dir = $(midas_dir)/utils
 bridge_dir = $(midas_dir)/bridges
+vcd_dir = $(midas_dir)/vcd-writer
 v_dir = $(abspath ../verilog)
 r_dir = $(abspath ../resources)
 
@@ -54,7 +55,7 @@ $(OUT_DIR)/dramsim2_ini: $(testchip_dir)/dramsim2_ini
 $(OUT_DIR)/$(DESIGN).chain:
 	$(if $(wildcard $(GEN_DIR)/$(DESIGN).chain),cp $(GEN_DIR)/$(DESIGN).chain $@,)
 
-override CXXFLAGS += -I$(midas_dir) -I$(util_dir)
+override CXXFLAGS += -I$(midas_dir) -I$(util_dir) -I$(vcd_dir)
 # The trailing whitespace is important for some reason...
 override LDFLAGS := $(LDFLAGS) -L$(GEN_DIR) -lstdc++ -lpthread -lgmp -lmidas 
 
@@ -70,13 +71,27 @@ $(bridge_o): $(GEN_DIR)/%.o: $(bridge_dir)/%.cc $(design_h) $(bridge_h)
 
 platform_files := simif simif_$(PLATFORM)
 platform_h := $(addprefix $(midas_dir)/, $(addsuffix .h, $(platform_files)))
-platform_cc := $(addprefix $(midas_dir)/, $(addsuffix .cc, $(platform_files)))
+platform_cc := $(addprefix $(midas_dir)/, $(addsuffix .cpp, $(platform_files)))
 platform_o := $(addprefix $(GEN_DIR)/, $(addsuffix .o, $(platform_files)))
+
+vcd_o :=
+vcd_cc :=
+ifeq ($(strip $(PLATFORM)),convey)
+platform_h += $(vcd_dir)/vcd_writer.h
+vcd_o := $(GEN_DIR)/vcd_writer.o $(GEN_DIR)/vcd_utils.o
+vcd_cc := $(vcd_dir)/vcd_writer.cpp $(vcd_dir)/vcd_utils.cpp
+endif
+
+$(vcd_o): $(GEN_DIR)/%.o: $(vcd_dir)/%.cpp $(design_h) $(platform_h)
+	mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $< -include $(word 2, $^)
 
 $(platform_o): $(GEN_DIR)/%.o: $(midas_dir)/%.cc $(design_h) $(platform_h)
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c -o $@ $< -include $(word 2, $^)
-
+$(warning platform_o $(platform_o))
+$(warning vcd_o $(vcd_o))
+platform_o += $(vcd_o)
 $(OUT_DIR)/$(DESIGN)-$(PLATFORM): $(design_h) $(lib) $(DRIVER) $(driver_h) $(platform_o) $(bridge_o)
 	mkdir -p $(OUT_DIR)
 	$(CXX) $(CXXFLAGS) -include $< \
@@ -95,7 +110,7 @@ $(info convey emu)
 emul_files := simif simif_convey_emul emul/wolverine_interface
 emul_h     := $(driver_h) $(bridge_h)  $( $(addprefix $(midas_dir)/, $(addsuffix .h, $(emul_files) emul/wolverine_interface)))
 # This includes c sources and static libraries
-emul_cc    := $(DRIVER) $(bridge_cc) $(addprefix $(midas_dir)/, $(addsuffix .cc, $(emul_files))) $(lib)
+emul_cc    := $(DRIVER) $(bridge_cc) $(addprefix $(midas_dir)/, $(addsuffix .cc, $(emul_files))) $(lib) $(vcd_cc)
 emul_v     := $(design_vh) $(design_v) $(sim_fpga_resource_models)
 
 verilator_conf := rtlsim/ml-verilator-conf.vlt

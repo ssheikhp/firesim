@@ -34,3 +34,6 @@
 [submodule "sim/firesim-lib/src/main/cc/lib/libdwarf"]
 	path = sim/firesim-lib/src/main/cc/lib/libdwarf
 	url = git://git.code.sf.net/p/libdwarf/code
+[submodule "sim/midas/src/main/cc/vcd-writer"]
+	path = sim/midas/src/main/cc/vcd-writer
+	url = https://github.com/davidmetz/vcd-writer.git
