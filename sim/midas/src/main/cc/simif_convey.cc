@@ -70,8 +70,9 @@ simif_convey_t::simif_convey_t(int argc, char** argv) {
   printf("done\n");
 
   printf("allocate memmory...");
-  // allocate 1GB alligned to 64bytes
-  int aloc_resp = wdm_posix_memalign(m_coproc, (void**)&cp_base, 64, 0x40000000UL);
+  fflush(stdout);
+  // allocate 32GB alligned to 64bytes
+  int aloc_resp = wdm_posix_memalign(m_coproc, (void**)&cp_base, 64, 0x800000000UL);
   printf("response: %d\n", aloc_resp);
   printf("cp_base: %p\n", (void *)cp_base);
 
@@ -113,6 +114,10 @@ simif_convey_t::~simif_convey_t() {
 //      for (size_t i = 0 ; i < 0x1000 ; i++) {
 //        printf("%p - %x\n", &dst[i], dst[i]);
 //      }
+    uint32_t mem_error = readCSR(13);
+    //if(mem_error){
+        printf("mem_axi_error_reg: %u\n", mem_error);
+    //}
 
     if(close(fd)!=0){
       fprintf(stderr, "fd close Failed\n");
@@ -176,13 +181,13 @@ uint32_t simif_convey_t::read(size_t off)
     uint64_t tmp = (((uint64_t)(0x00000000UL | off*4)) << 32);
     writeCSR(CSR_ADAPT_AXI, tmp);
     uint64_t result = readCSR(CSR_ADAPT_AXI);
-//    printf("R %d - %x\n", off, (uint32_t)result);
+    //printf("R %d - %x\n", off, (uint32_t)result);
     return result;
 }
 
 void simif_convey_t::write(size_t off, uint32_t word)
 {
-    printf("W %d - %x\n", off, word);
+    //printf("W %d - %x\n", off, word);
     uint64_t tmp = (((uint64_t)(0x80000000UL | off*4)) << 32) | word;
     writeCSR(CSR_ADAPT_AXI, tmp);
 }

@@ -42,6 +42,9 @@ class firesim_top_t: virtual simif_t, public systematic_scheduler_t
         bool simulation_complete();
         // Returns the error code of the first bridge for which it is non-zero
         int exit_code();
+        
+        int monitor_exit_code = 0;
+        bool monitor_complete = false;
 };
 
 #endif // __FIRESIM_TOP_H

@@ -480,7 +480,7 @@ firesim_top_t::firesim_top_t(int argc, char** argv)
 }
 
 bool firesim_top_t::simulation_complete() {
-    bool is_complete = false;
+    bool is_complete = monitor_complete;
     for (auto &e: bridges) {
         is_complete |= e->terminate();
     }
@@ -499,7 +499,7 @@ int firesim_top_t::exit_code(){
         if (e->exit_code())
             return e->exit_code();
     }
-    return 0;
+    return monitor_exit_code;
 }
 
 
@@ -531,6 +531,7 @@ void firesim_top_t::run() {
         run_scheduled_tasks();
         step(get_largest_stepsize(), false);
         while(!done() && !simulation_complete()){
+            //printf("firesim loop\n");
             for (auto &e: bridges) e->tick();
 
             uint64_t tcycle = actual_tcycle();
@@ -542,6 +543,9 @@ void firesim_top_t::run() {
                         printf("blaming %s\n", monitor_causes[i]);
                     }
                 }
+                monitor_exit_code = -1;
+                monitor_complete = true;
+                break;
             }
             previous_tcycle = tcycle;
         }
