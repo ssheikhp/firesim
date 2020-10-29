@@ -317,9 +317,11 @@ class WolverineShim(implicit p: Parameters) extends PlatformShim {
         }
       }
       val length = 16
-      val generateMem = (dt: UInt, wi: UInt) => {
+      val generateMem = (dt: UInt, wi: UInt, en: Bool) => {
         val mem = SyncReadMem(length, dt.cloneType)
-        mem(wi) := WireInit(dt)
+        when(en){
+          mem(wi) := WireInit(dt)
+        }
         mem
       } : SyncReadMem[UInt]
       val read_index_reg = RegInit(0.U(log2Ceil(length).W))
@@ -333,20 +335,20 @@ class WolverineShim(implicit p: Parameters) extends PlatformShim {
       generateCSRread(time_step, "time_step")
       mem_axi.elements.foreach{ case (bundleName, bd_data) => {
         val data = WireInit(bd_data)
-        val mems_data = mutable.Map.empty[String, SyncReadMem[UInt]] //SyncReadMem(length, data.cloneType)
-        val mem_time = SyncReadMem(length, time_step.cloneType)
+        val mems_data = mutable.Map.empty[String, SyncReadMem[UInt]]
+        val mem_time = SyncReadMem(length, time_step.cloneType).suggestName("mem_"+bundleName+"_time")
         data match {
           case r: ReadyValidIO[Bundle] => {
             val (write_index_reg, _) = Counter(r.fire(), length)
+            mems_data(bundleName+"_ready") = generateMem(r.ready, write_index_reg, r.fire()).suggestName("mem_"+bundleName+"_ready")
+            mems_data(bundleName+"_valid") = generateMem(r.valid, write_index_reg, r.fire()).suggestName("mem_"+bundleName+"_valid")
+            r.bits.elements.foreach{case (name, dt) => {
+              dt match {
+                case d: UInt => mems_data(bundleName+"_"+name) = generateMem(d, write_index_reg, r.fire()).suggestName("mem_"+bundleName+"_"+name)
+                case _ => println(f"skipping $name")
+              }
+            }}
             when(r.fire()){
-              mems_data(bundleName+"_ready") = generateMem(r.ready, write_index_reg)
-              mems_data(bundleName+"_valid") = generateMem(r.valid, write_index_reg)
-              r.bits.elements.foreach{case (name, dt) => {
-                dt match {
-                  case d: UInt => mems_data(bundleName+"_"+name) = generateMem(d, write_index_reg)
-                  case _ => println(f"skipping $name")
-                }
-              }}
               mem_time(write_index_reg) := time_step
             }
           }
