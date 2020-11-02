@@ -145,9 +145,11 @@ std::string toBinary(int n) {
     else if (n%2 != 0) return toBinary(n/2) + "1";
 }
 
-int simif_convey_emul_t::finish() {
+int simif_convey_t::finish() {
     HeadPtr head = makeVCDHeader(TimeScale::ONE, TimeScaleUnit::ns, utils::now());
 	VCDWriter writer{"axi.vcd", std::move(head)};
+
+	VarPtr clock =  writer.register_var("mem",  "clock",  VariableType::wire, 1);
 
 	VarPtr r_ready =  writer.register_var("mem.r",  "r_ready",  VariableType::wire, CSR_r_ready_width);
 	VarPtr r_resp =   writer.register_var("mem.r",  "r_resp",   VariableType::wire, CSR_r_resp_width);
@@ -187,6 +189,45 @@ int simif_convey_emul_t::finish() {
 	VarPtr aw_burst = writer.register_var("mem.aw", "aw_burst", VariableType::wire, CSR_aw_burst_width);
 	VarPtr aw_ready = writer.register_var("mem.aw", "aw_ready", VariableType::wire, CSR_aw_ready_width);
 	VarPtr aw_prot =  writer.register_var("mem.aw", "aw_prot",  VariableType::wire, CSR_aw_prot_width);
+
+	writer.change(clock,0,"x");
+	writer.change(r_ready,0,"x");
+    writer.change(r_resp,0,"x");
+    writer.change(r_last,0,"x");
+    writer.change(r_data,0,"x");
+    writer.change(r_valid,0,"x");
+    writer.change(r_id,0,"x");
+    writer.change(ar_addr,0,"x");
+    writer.change(ar_qos,0,"x");
+    writer.change(ar_len,0,"x");
+    writer.change(ar_prot,0,"x");
+    writer.change(ar_burst,0,"x");
+    writer.change(ar_ready,0,"x");
+    writer.change(ar_id,0,"x");
+    writer.change(ar_size,0,"x");
+    writer.change(ar_lock,0,"x");
+    writer.change(ar_valid,0,"x");
+    writer.change(ar_cache,0,"x");
+    writer.change(b_ready,0,"x");
+    writer.change(b_id,0,"x");
+    writer.change(b_resp,0,"x");
+    writer.change(b_valid,0,"x");
+    writer.change(w_last,0,"x");
+    writer.change(w_data,0,"x");
+    writer.change(w_valid,0,"x");
+    writer.change(w_strb,0,"x");
+    writer.change(w_ready,0,"x");
+    writer.change(aw_id,0,"x");
+    writer.change(aw_addr,0,"x");
+    writer.change(aw_valid,0,"x");
+    writer.change(aw_cache,0,"x");
+    writer.change(aw_size,0,"x");
+    writer.change(aw_qos,0,"x");
+    writer.change(aw_len,0,"x");
+    writer.change(aw_lock,0,"x");
+    writer.change(aw_burst,0,"x");
+    writer.change(aw_ready,0,"x");
+    writer.change(aw_prot,0,"x");
 
     uint64_t current_time_step = readCSR(CSR_time_step);
     std::map<uint64_t, std::map<VarPtr, uint64_t>> data_map;
@@ -302,13 +343,18 @@ int simif_convey_emul_t::finish() {
     data_map[current_time_step][aw_ready] = readCSR(CSR_aw_current_ready);
     data_map[current_time_step][aw_prot] =  readCSR(CSR_aw_current_prot);
     data_map[current_time_step+1][aw_valid] = 0;
+    uint64_t ts_prev = data_map.begin()->first;
     for(auto ts : data_map){
+        for(;ts_prev<ts.first; ts_prev++){
+            writer.change(clock,  ts_prev*2, "1");
+            writer.change(clock,  ts_prev*2+1, "0");
+        }
         for(auto v: ts.second){
-            writer.change(v.first,  ts.first, toBinary(v.second));
+            writer.change(v.first,  ts.first*2, toBinary(v.second));
         }
     }
   int exitcode = simif_t::finish();
-  ::finish();
+//  ::finish();
   return exitcode;
 }
 
