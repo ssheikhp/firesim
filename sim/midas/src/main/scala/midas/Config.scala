@@ -95,6 +95,19 @@ class ZedboardConfig extends Config(new Config((site, here, up) => {
     idBits    = 6)
 }) ++ new ZynqBaseConfig)
 
+class MidasWolverineConfig extends Config(new Config((site, here, up) => {
+  case Platform       => (p: Parameters) => new WolverineShim()(p)
+  case HasDMAChannel  => false
+  case CtrlNastiKey   => NastiParameters(32, 32, 6) // TODO: adjust?
+  case HostMemChannelKey => HostMemChannelParams(
+    size      = 0x800000000L, // 32 GiB
+    beatBytes = 8,
+    idBits    = 16,
+    maxXferBytes = 64
+  )
+  case HostMemNumChannels => 1 // 1 channel for now
+}) ++ new SimConfig)
+
 class F1Config extends Config(new Config((site, here, up) => {
   case Platform       => (p: Parameters) => new F1Shim()(p)
   case HasDMAChannel  => true

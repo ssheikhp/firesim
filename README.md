@@ -1,8 +1,32 @@
 # FireSim: Easy-to-use, Scalable, FPGA-accelerated Cycle-accurate Hardware Simulation
 
-![FireSim Documentation Status](https://readthedocs.org/projects/firesim/badge/)
-[![firesim](https://circleci.com/gh/firesim/firesim.svg?style=shield)](https://app.circleci.com/pipelines/github/firesim/firesim)
-
+# NTNU-Firesim fork:
+## Convey platform
+* supports no DMA so confugs need to be based on `WithNoDmaFireSimBridges`
+* uses sampeling tracer TracerS as a replacement of TracerV
+    * supports sampeling at static intervals - e.g. every 10000 target cycles
+* platform selection: `PLATFORM_CONFIG=WolverineConfig PLATFORM=convey`
+* convey platform supports full verilator based simulation e.g.:
+`make TARGET_CONFIG=FireSimNoDmaSystemConfig PLATFORM_CONFIG=WolverineConfig PLATFORM=convey SIM_BINARY=~/Downloads/ibda.elf run-verilator-debug`
+* fpga frequency selection `FPGA_FREQUNCY=25`
+    * supported frequencies: 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150, 175, 200, 225, 250 MHz
+* before build/simulation on lobo:
+```
+# vivado 2014 license
+export XILINXD_LICENSE_FILE=2100@lisens.idi.ntnu.no
+# convey pdk
+source /opt/convey/pdk2/latest/settings.sh
+# vivado activation
+source /opt/Xilinx/Vivado/2014.4/settings64.sh
+# updated gcc/git/python
+source scl_source enable devtoolset-8
+source scl_source enable sclo-git25
+source scl_source enable rh-python36
+# firesim + chipyard toolchain
+source ~/git/firesim/sim/env.sh
+```
+* example make command (in firesim/sim):
+`make TARGET_CONFIG=FireSimNoDmaMegaBoomConfig PLATFORM_CONFIG=WolverineConfig PLATFORM=convey FPGA_FREQUNCY=25 fpga convey-app`
 ## Contents
 
 1. [Using FireSim](#using-firesim)

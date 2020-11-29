@@ -133,9 +133,9 @@ class simif_t
     bool expect(size_t id, mpz_t& expected);
 
     // LOADMEM functions
-    void read_mem(size_t addr, mpz_t& value);
-    void write_mem(size_t addr, mpz_t& value);
-    void write_mem_chunk(size_t addr, mpz_t& value, size_t bytes);
+    virtual void read_mem(size_t addr, mpz_t& value);
+    virtual void write_mem(size_t addr, mpz_t& value);
+    virtual void write_mem_chunk(size_t addr, mpz_t& value, size_t bytes);
     void zero_out_dram();
 
     uint64_t get_seed() { return seed; };

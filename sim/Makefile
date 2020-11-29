@@ -126,3 +126,8 @@ testOnly: $(FIRRTL_JAR) $(FIRRTL_TEST_JAR)
 # All target-agnostic firesim recipes are defined here
 include target-agnostic.mk
 
+
+# Point at the desired FPGA platform makefrag
+PLATFORM_MAKEFRAG = $(abspath ..)/platforms/$(PLATFORM)/platform-specific.mk
+
+include $(PLATFORM_MAKEFRAG)

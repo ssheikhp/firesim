@@ -8,6 +8,7 @@
 #include "bridges/simplenic.h"
 #include "bridges/blockdev.h"
 #include "bridges/tracerv.h"
+#include "bridges/tracers.h"
 #include "bridges/groundtest.h"
 #include "bridges/autocounter.h"
 #include "bridges/dromajo.h"
@@ -247,6 +248,13 @@ firesim_top_t::firesim_top_t(int argc, char** argv)
     #ifdef SIMPLENICBRIDGEMODULE_7_PRESENT
     SIMPLENICBRIDGEMODULE_7_substruct_create;
     add_bridge_driver(new simplenic_t(this, args, SIMPLENICBRIDGEMODULE_7_substruct, 7, SIMPLENICBRIDGEMODULE_7_DMA_ADDR));
+    #endif
+#endif
+
+#ifdef TRACERSBRIDGEMODULE_struct_guard
+    #ifdef TRACERSBRIDGEMODULE_0_PRESENT
+    TRACERSBRIDGEMODULE_0_substruct_create;
+    add_bridge_driver(new tracers_t(this, TRACERSBRIDGEMODULE_0_substruct, 0));
     #endif
 #endif
 
@@ -521,7 +529,7 @@ firesim_top_t::firesim_top_t(int argc, char** argv)
 }
 
 bool firesim_top_t::simulation_complete() {
-    bool is_complete = false;
+    bool is_complete = monitor_complete;
     for (auto &e: bridges) {
         is_complete |= e->terminate();
     }
@@ -540,15 +548,16 @@ int firesim_top_t::exit_code(){
         if (e->exit_code())
             return e->exit_code();
     }
-    return 0;
+    return monitor_exit_code;
 }
 
 
 void firesim_top_t::run() {
+    printf("init fpga models\n");
     for (auto &e: fpga_models) {
         e->init();
     }
-
+    printf("init bridges\n");
     for (auto &e: bridges) {
         e->init();
     }
@@ -564,11 +573,30 @@ void firesim_top_t::run() {
     // Assert reset T=0 -> 50
     target_reset(50);
 
+    BRIDGEMONITOR_0_substruct_create
+    uint64_t previous_tcycle = actual_tcycle();
+
     while (!simulation_complete() && !has_timed_out()) {
         run_scheduled_tasks();
         step(get_largest_stepsize(), false);
         while(!done() && !simulation_complete()){
+            //printf("firesim loop\n");
             for (auto &e: bridges) e->tick();
+
+            uint64_t tcycle = actual_tcycle();
+            if(tcycle == previous_tcycle){
+                uint32_t blame = read(BRIDGEMONITOR_0_substruct->BLAME_HOST);
+                printf("target did not progress! cycle %llu\n", tcycle);
+                for(int i=0; i<MONITOR_BRIDGE_CNT; i++){
+                    if((blame>>i)&1){
+                        printf("blaming %s\n", monitor_causes[i]);
+                    }
+                }
+                monitor_exit_code = -1;
+                monitor_complete = true;
+                break;
+            }
+            previous_tcycle = tcycle;
         }
     }
 

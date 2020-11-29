@@ -1,0 +1,42 @@
+# Copyright 2013-2014 Convey Computer Corp. 
+
+# Supported Platforms:  hc-1, hc-1ex, hc-2, hc-2ex, wx-690, wx-2000
+CNY_PDK_PLATFORM = wx-2000
+CNY_PDK_HDLSIM = Mentor
+
+CNY_PDK_SIG = 65012
+CNY_PDK_NICK = wolverine_firesim
+# must not be defined if memory is used
+#DISABLE_CP_MEM = 0
+AE_AE_IF = 0
+# MC_XBAR = 1
+#CAE_CSR_RING_IF = 1
+USE_PERS_CSR_AGENT = 1
+
+SAME_PERS = 0
+AE0_NAME = WolverineTest
+AE1_NAME = null_pers
+AE2_NAME = null_pers
+AE3_NAME = null_pers
+NUM_AES = 1
+NUM_MC_PORTS = 1
+MC_RTNCTL_WIDTH = 32
+
+# disable memmory ordering to save space
+MC_RSP_ORDER = 0
+# valid frequency values in modified pdk (in pdk_clock.v):
+# 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150, 175, 200, 225, 250
+CLK_PERS_FREQ ?= 50
+
+# disable clock gating
+RM_PWR_LIMIT = 1
+
+# Personality clock frequency 
+#   CLK_PERS_FREQ = <50|75|100...250>
+#   CLK_PERS_FREQ = SYNC_CLK
+#     default is SYNC_CLK (150 for HC, 167 for WX)
+
+####################################################################
+# Include Convey Makefile Template
+####################################################################
+include $(CNY_PDK)/$(CNY_PDK_REV)/lib/MakefileInclude.cnypdk

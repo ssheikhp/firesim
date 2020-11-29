@@ -39,7 +39,8 @@ object ChannelClockInfoAnalysis extends Transform {
     }).toMap
 
     val finder = new ClockSourceFinder(state)
-    val clockSourceMap = channelClocks.map({ case (k, v) => v -> finder.findRootDriver(v) }).toMap
+    val tmp = channelClocks.toList.map({ case (k, v) => v -> finder.findRootDriver(v) })
+    val clockSourceMap = tmp.toMap
     channelClocks.mapValues(sinkClock => sourceInfoMap(clockSourceMap(sinkClock).get))
   }
   def execute(state: CircuitState): CircuitState = {

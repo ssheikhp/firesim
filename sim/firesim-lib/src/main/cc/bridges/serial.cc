@@ -74,16 +74,21 @@ void serial_t::go() {
 }
 
 void serial_t::send() {
-    while(fesvr->data_available() && read(this->mmio_addrs->in_ready)) {
-        write(this->mmio_addrs->in_bits, fesvr->recv_word());
-        write(this->mmio_addrs->in_valid, 1);
+    if(fesvr->data_available()){
+        int space = read(this->mmio_addrs->in_space);
+        int i;
+        for(i=0; i<space && fesvr->data_available(); i++) {
+            write(this->mmio_addrs->in, fesvr->recv_word());
+        }
+        //printf("serial sent %d\n", i);
     }
 }
 
 void serial_t::recv() {
-    while(read(this->mmio_addrs->out_valid)) {
-        fesvr->send_word(read(this->mmio_addrs->out_bits));
-        write(this->mmio_addrs->out_ready, 1);
+    int available;
+    available = read(this->mmio_addrs->out_count);
+    for(int i=0; i<available; i++){
+        fesvr->send_word(read(this->mmio_addrs->out));
     }
 }
 
@@ -140,16 +145,16 @@ void serial_t::serial_bypass_via_loadmem() {
 
 void serial_t::tick() {
     // First, check to see step_size tokens have been enqueued
-    if (!read(this->mmio_addrs->done)) return;
+    //if (!read(this->mmio_addrs->done)) return;
     // Collect all the responses from the target
     this->recv();
     // Punt to FESVR
     if (!fesvr->data_available()) {
         fesvr->tick();
     }
-    if (fesvr->has_loadmem_reqs()) {
-        serial_bypass_via_loadmem();
-    }
+    //if (fesvr->has_loadmem_reqs()) {
+    //    serial_bypass_via_loadmem();
+    //}
     if (!terminate()) {
         // Write all the requests to the target
         this->send();

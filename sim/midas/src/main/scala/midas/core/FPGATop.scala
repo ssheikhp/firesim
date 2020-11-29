@@ -10,9 +10,10 @@ import chisel3.util._
 import chisel3.core.ActualDirection
 import chisel3.core.DataMirror.directionOf
 import freechips.rocketchip.amba.axi4._
-import freechips.rocketchip.config.{Parameters, Field}
+import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.util.{DecoupledHelper, HeterogeneousBag}
+import midas.widgets.CppGenerationUtils.{genArray, genMacro}
 
 import scala.collection.mutable
 
@@ -79,6 +80,7 @@ class FPGATop(implicit p: Parameters) extends LazyModule with HasWidgets {
   val SimWrapperConfig(chAnnos, bridgeAnnos, leafTypeMap) = p(SimWrapperKey)
   val master = addWidget(new SimulationMaster)
   val bridgeModuleMap: Map[BridgeIOAnnotation, BridgeModule[_ <: TokenizedRecord]] = bridgeAnnos.map(anno => anno -> addWidget(anno.elaborateWidget)).toMap
+  val monitor = addWidget(new BridgeMonitor)
 
   // Find all bridges that wish to be allocated FPGA DRAM, and group them
   // according to their memoryRegionName. Requested addresses will be unified
@@ -190,6 +192,7 @@ class FPGATop(implicit p: Parameters) extends LazyModule with HasWidgets {
 class FPGATopImp(outer: FPGATop)(implicit p: Parameters) extends LazyModuleImp(outer) {
 
   val master  = outer.master
+  val monitor = outer.monitor
 
   val ctrl = IO(Flipped(WidgetMMIO()))
   val mem = IO(Vec(p(HostMemNumChannels), AXI4Bundle(p(HostMemChannelKey).axi4BundleParams)))
@@ -213,6 +216,8 @@ class FPGATopImp(outer: FPGATop)(implicit p: Parameters) extends LazyModuleImp(o
   case class DmaInfo(name: String, port: NastiIO, size: BigInt)
   val dmaInfoBuffer = new mutable.ListBuffer[DmaInfo]
 
+  val hostPorts = new mutable.ListBuffer[HostPortIO[Data]]
+  val monitorBridgeNames = new mutable.ListBuffer[String]
   // Instantiate bridge widgets.
   outer.bridgeModuleMap.map({ case (bridgeAnno, bridgeMod) =>
     val widgetChannelPrefix = s"${bridgeAnno.target.ref}"
@@ -223,12 +228,26 @@ class FPGATopImp(outer: FPGATop)(implicit p: Parameters) extends LazyModuleImp(o
       case _ =>
     }
     bridgeMod.module.hPort.connectChannels2Port(bridgeAnno, simIo)
+    bridgeMod.module.hPort match {
+      case o: ChannelizedHostPortIO =>
+      case vector: ClockTokenVector =>
+      case o: HostPortIO[_] => {
+        hostPorts += o
+        monitorBridgeNames += bridgeAnno.target.ref
+      }
+      case _ =>
+    }
 
     bridgeMod.module match {
       case widget: HasDMA => dmaInfoBuffer += DmaInfo(bridgeMod.getWName, widget.dma, widget.dmaSize)
       case _ => Nil
     }
   })
+
+  monitor.module.io.fromHostValid := Cat(hostPorts.reverse.map(_.fromHost.hValid))
+  monitor.module.io.fromHostReady := Cat(hostPorts.reverse.map(_.fromHost.hReady))
+  monitor.module.io.toHostValid := Cat(hostPorts.reverse.map(_.toHost.hValid))
+  monitor.module.io.toHostReady := Cat(hostPorts.reverse.map(_.toHost.hReady))
 
   // Sort the list of DMA ports by address region size, largest to smallest
   val dmaInfoSorted = dmaInfoBuffer.sortBy(_.size).reverse.toSeq
@@ -292,5 +311,9 @@ class FPGATopImp(outer: FPGATop)(implicit p: Parameters) extends LazyModuleImp(o
     "DMA_BEAT_BYTES" -> p(DMANastiKey).dataBits / 8,
     "DMA_SIZE"       -> log2Ceil(p(DMANastiKey).dataBits / 8)
   ) ++ Seq.tabulate[(String, Long)](p(HostMemNumChannels))(idx => s"MEM_HAS_CHANNEL${idx}" -> 1)
-  def genHeader(sb: StringBuilder)(implicit p: Parameters) = outer.genHeader(sb)
+  def genHeader(sb: StringBuilder)(implicit p: Parameters) = {
+    outer.genHeader(sb)
+    sb.append(genArray(s"monitor_causes", monitorBridgeNames.map(CStrLit)))
+    sb.append(genMacro("MONITOR_BRIDGE_CNT", monitorBridgeNames.size.toString))
+  }
 }
