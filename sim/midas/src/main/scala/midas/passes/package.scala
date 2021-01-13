@@ -55,7 +55,8 @@ package object passes {
       params = Nil)
 
     val impl =
-      s"""module ${blackboxName}(
+      s"""`ifdef VERILATOR
+          |module ${blackboxName}(
           |  input      I,
           |  input      CE,
           |  output reg O
@@ -67,6 +68,7 @@ package object passes {
           |  assign O = (I & enable);
           |  /* verilator lint_on COMBDLY */
           |endmodule
+          |`endif
           |""".stripMargin
 
     def analyze(cs: CircuitState): CircuitName = CircuitName(cs.circuit.main)
