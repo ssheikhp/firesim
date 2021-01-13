@@ -1,4 +1,5 @@
 //See LICENSE for license details
+#if defined(PLATFORM_f1) || (defined(RTLSIM) && !defined(PLATFORM_convey))
 #ifndef RTLSIM
 #include "simif_f1.h"
 #else
@@ -42,3 +43,4 @@ int main(int argc, char** argv) {
     abort();
   }
 }
+#endif //PLATFORM_f1

@@ -90,7 +90,7 @@ conf: $(fame_annos)
 # Verilator MIDAS-Level Simulators #
 ####################################
 
-VERILATOR_CXXOPTS ?= -O0
+VERILATOR_CXXOPTS ?= -O0 -D PLATFORM_$(PLATFORM)
 VERILATOR_MAKEFLAGS ?= -j8 VM_PARALLEL_BUILDS=1
 
 verilator = $(GENERATED_DIR)/V$(DESIGN)
@@ -138,7 +138,7 @@ vcs-debug: $(vcs_debug)
 ############################
 # Master Simulation Driver #
 ############################
-DRIVER_CXXOPTS ?= -O2
+DRIVER_CXXOPTS ?= -O2 -D PLATFORM_$(PLATFORM)
 
 $(OUTPUT_DIR)/$(DESIGN).chain: $(VERILOG)
 	mkdir -p $(OUTPUT_DIR)
