@@ -162,79 +162,24 @@ $(f1): $(HEADER) $(DRIVER_CC) $(DRIVER_H) $(midas_cc) $(midas_h) $(runtime_conf)
 	GEN_DIR=$(OUTPUT_DIR)/build OUT_DIR=$(OUTPUT_DIR) DRIVER="$(DRIVER_CC)" \
 	TOP_DIR=$(chipyard_dir)
 
-#############################
-# FPGA Build Initialization #
-#############################
-board_dir 	   := $(fpga_dir)/hdk/cl/developer_designs
-fpga_work_dir  := $(board_dir)/cl_$(name_tuple)
-fpga_build_dir := $(fpga_work_dir)/build
-verif_dir      := $(fpga_work_dir)/verif
-fpga_v         := $(fpga_work_dir)/design/cl_firesim_generated.sv
-ila_work_dir   := $(fpga_work_dir)/design/ila_files/
-fpga_vh        := $(fpga_work_dir)/design/cl_firesim_generated_defines.vh
-fpga_tcl_env   := $(fpga_work_dir)/design/cl_firesim_generated_env.tcl
-repo_state     := $(fpga_work_dir)/design/repo_state
+convey_dir = /opt/convey
 
-$(fpga_work_dir)/stamp: $(shell find $(board_dir)/cl_firesim -name '*')
-	mkdir -p $(@D)
-	cp -rf $(board_dir)/cl_firesim -T $(fpga_work_dir)
-	touch $@
+convey-app: export CXXFLAGS := $(CXXFLAGS) $(common_cxx_flags) $(DRIVER_CXXOPTS) -I$(fpga_dir)/sdk/userspace/include \
+	-I$(convey_dir)/include \
+	-I$(convey_dir)/pdk2/latest/wx-2000/include \
+	-I$(convey_dir)/driver_build \
+	-D__STDC_FORMAT_MACROS
+# Statically link libfesvr to make it easier to distribute drivers to f1 instances
+convey-app: export LDFLAGS := $(LDFLAGS) $(common_ld_flags) -L$(convey_dir)/lib -l:libwx_runtime.so -L$(convey_dir)/pdk2/latest/wx-2000/lib -lcnyfwd
 
-$(fpga_v): $(VERILOG) $(fpga_work_dir)/stamp
-	$(firesim_base_dir)/../scripts/repo_state_summary.sh > $(repo_state)
-	cp -f $< $@
-	sed -i "s/\$$random/64'b0/g" $@
-	sed -i "s/\(^ *\)fatal;\( *$$\)/\1fatal(0, \"\");\2/g" $@
-
-$(fpga_vh): $(VERILOG) $(fpga_work_dir)/stamp
-	cp -f $(GENERATED_DIR)/$(@F) $@
-
-$(fpga_tcl_env): $(VERILOG) $(fpga_work_dir)/stamp
-	cp -f $(GENERATED_DIR)/$(@F) $@
-
-.PHONY: $(ila_work_dir)
-$(ila_work_dir): $(verilog) $(fpga_work_dir)/stamp
-	cp -f $(GENERATED_DIR)/firesim_ila_insert_* $(fpga_work_dir)/design/ila_files/
-	sed -i "s/\$$random/64'b0/g" $(fpga_work_dir)/design/ila_files/*
-	sed -i "s/\(^ *\)fatal;\( *$$\)/\1fatal(0, \"\");\2/g" $(fpga_work_dir)/design/ila_files/*
-
-# Goes as far as setting up the build directory without running the cad job
-# Used by the manager before passing a build to a remote machine
-replace-rtl: $(fpga_v) $(ila_work_dir) $(fpga_vh) $(fpga_tcl_env)
-
-.PHONY: replace-rtl
-
-$(firesim_base_dir)/scripts/checkpoints/$(target_sim_tuple): $(fpga_work_dir)/stamp
-	mkdir -p $(@D)
-	ln -sf $(fpga_build_dir)/checkpoints/to_aws $@
-
-# Runs a local fpga-bitstream build. Strongly consider using the manager instead.
-fpga: export CL_DIR := $(fpga_work_dir)
-fpga: $(fpga_v) $(base_dir)/scripts/checkpoints/$(target_sim_tuple)
-	cd $(fpga_build_dir)/scripts && ./aws_build_dcp_from_cl.sh -notify
-
-
-#############################
-# FPGA-level RTL Simulation #
-#############################
-
-# Run XSIM DUT
-.PHONY: xsim-dut
-xsim-dut: replace-rtl $(fpga_work_dir)/stamp
-	cd $(verif_dir)/scripts && $(MAKE) C_TEST=test_firesim
-
-# Compile XSIM Driver #
-xsim = $(GENERATED_DIR)/$(DESIGN)-$(PLATFORM)
-
-$(xsim): export CXXFLAGS := $(CXXFLAGS) $(common_cxx_flags) -D SIMULATION_XSIM -D NO_MAIN
-$(xsim): export LDFLAGS := $(LDFLAGS) $(common_ld_flags)
-$(xsim): $(HEADER) $(DRIVER_CC) $(DRIVER_H) $(midas_cc) $(midas_h)
-	$(MAKE) -C $(simif_dir) f1 PLATFORM=f1 DESIGN=$(DESIGN) \
-	GEN_DIR=$(GENERATED_DIR) OUT_DIR=$(GENERATED_DIR) DRIVER="$(DRIVER_CC)" \
+# Compile Driver
+convey-app: $(HEADER) $(DRIVER_CC) $(DRIVER_H) $(midas_cc) $(midas_h) $(runtime_conf)
+	mkdir -p $(OUTPUT_DIR)/build
+	cp $(HEADER) $(OUTPUT_DIR)/build/
+	cp -f $(GENERATED_DIR)/$(CONF_NAME) $(OUTPUT_DIR)/runtime.conf
+	$(MAKE) -C $(simif_dir) $(PLATFORM) PLATFORM=$(PLATFORM) DESIGN=$(DESIGN) \
+	GEN_DIR=$(OUTPUT_DIR)/build OUT_DIR=$(OUTPUT_DIR) DRIVER="$(DRIVER_CC)" \
 	TOP_DIR=$(chipyard_dir)
-
-.PHONY: xsim
-xsim: $(xsim)
 
 #########################
 # MIDAS Unit Tests      #
