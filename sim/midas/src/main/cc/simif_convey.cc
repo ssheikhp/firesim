@@ -144,7 +144,6 @@ std::string toBinary(int n) {
 
 int simif_convey_t::finish() {
   int exitcode = simif_t::finish();
-  ::finish();
   return exitcode;
 }
 
