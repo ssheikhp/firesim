@@ -74,16 +74,22 @@ void serial_t::go() {
 }
 
 void serial_t::send() {
-    while(fesvr->data_available() && read(this->mmio_addrs->in_ready)) {
-        write(this->mmio_addrs->in_bits, fesvr->recv_word());
-        write(this->mmio_addrs->in_valid, 1);
+    if(fesvr->data_available()){
+        int space = read(this->mmio_addrs->in_space);
+        int i;
+        for(i=0; i<space && fesvr->data_available(); i++) {
+            int word = fesvr->recv_word();
+            write(this->mmio_addrs->in, word);
+//            printf("serial sent %08x %d\n", word, word);
+        }
     }
 }
 
 void serial_t::recv() {
-    while(read(this->mmio_addrs->out_valid)) {
-        fesvr->send_word(read(this->mmio_addrs->out_bits));
-        write(this->mmio_addrs->out_ready, 1);
+    int available;
+    available = read(this->mmio_addrs->out_count);
+    for(int i=0; i<available; i++){
+        fesvr->send_word(read(this->mmio_addrs->out));
     }
 }
 
