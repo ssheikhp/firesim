@@ -165,16 +165,16 @@ $(f1): $(HEADER) $(DRIVER_CC) $(DRIVER_H) $(midas_cc) $(midas_h) $(runtime_conf)
 convey_dir = /opt/convey
 CONVEY_BIN = $(OUTPUT_DIR)/FireSim-convey
 
-$(CONVEY_BIN): export CXXFLAGS := $(CXXFLAGS) $(common_cxx_flags) $(DRIVER_CXXOPTS) -I$(fpga_dir)/sdk/userspace/include \
+convey-app: export CXXFLAGS := $(CXXFLAGS) $(common_cxx_flags) $(DRIVER_CXXOPTS) -I$(fpga_dir)/sdk/userspace/include \
 	-I$(convey_dir)/include \
 	-I$(convey_dir)/pdk2/latest/wx-2000/include \
 	-I$(convey_dir)/driver_build \
 	-D__STDC_FORMAT_MACROS
 # Statically link libfesvr to make it easier to distribute drivers to f1 instances
-$(CONVEY_BIN): export LDFLAGS := $(LDFLAGS) $(common_ld_flags) -L$(convey_dir)/lib -l:libwx_runtime.so -L$(convey_dir)/pdk2/latest/wx-2000/lib -lcnyfwd
+convey-app: export LDFLAGS := $(LDFLAGS) $(common_ld_flags) -L$(convey_dir)/lib -l:libwx_runtime.so -L$(convey_dir)/pdk2/latest/wx-2000/lib -lcnyfwd
 
 # Compile Driver
-$(CONVEY_BIN): $(HEADER) $(DRIVER_CC) $(DRIVER_H) $(midas_cc) $(midas_h) $(runtime_conf)
+convey-app: $(HEADER) $(DRIVER_CC) $(DRIVER_H) $(midas_cc) $(midas_h) $(runtime_conf)
 	mkdir -p $(OUTPUT_DIR)/build
 	cp $(HEADER) $(OUTPUT_DIR)/build/
 	cp -f $(GENERATED_DIR)/$(CONF_NAME) $(OUTPUT_DIR)/runtime.conf
@@ -182,7 +182,6 @@ $(CONVEY_BIN): $(HEADER) $(DRIVER_CC) $(DRIVER_H) $(midas_cc) $(midas_h) $(runti
 	GEN_DIR=$(OUTPUT_DIR)/build OUT_DIR=$(OUTPUT_DIR) DRIVER="$(DRIVER_CC)" \
 	TOP_DIR=$(chipyard_dir)
 
-convey-app: $(CONNVEY_BIN)
 
 convey_serial_args = +fesvr-step-size=4000
 
