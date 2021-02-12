@@ -17,7 +17,6 @@ tracers_t::tracers_t(
     std::string suffix = std::string("=");
     std::string tracefile_arg = std::string("+tracefile") + suffix;
     std::string tracefreq_arg = std::string("+trace-freq") + suffix;
-    std::string tracefreq_arg = std::string("+trace-freq") + suffix;
     const char *tracefilename = NULL;
     for (auto &arg: args) {
         if (arg.find(tracefile_arg) == 0) {
