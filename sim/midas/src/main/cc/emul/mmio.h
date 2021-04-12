@@ -100,6 +100,5 @@ private:
 };
 void init(uint64_t memsize, bool dram, uint64_t dump_start_par);
 void load_mems(const char *fname);
-extern uint64_t dump_start;
 
 #endif // __MMIO_H

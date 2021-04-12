@@ -93,7 +93,7 @@ std::unique_ptr<mm_t> slave[MEM_NUM_CHANNELS];
 void init(uint64_t memsize, bool dramsim, uint64_t dump_start_par) {
   master.reset(new mmio_t(CTRL_BEAT_BYTES));
   dma.reset(new mmio_t(DMA_BEAT_BYTES));
-  dump_start = dump_start_par;
+  extern uint64_t dump_start = dump_start_par;
   for (int mem_channel_index=0; mem_channel_index < MEM_NUM_CHANNELS; mem_channel_index++) {
     slave[mem_channel_index].reset(dramsim ? (mm_t*) new mm_dramsim2_t(1 << MEM_ID_BITS) : (mm_t*) new mm_magic_t);
     slave[mem_channel_index]->init(memsize, MEM_BEAT_BYTES, 64);
