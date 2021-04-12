@@ -24,7 +24,7 @@ extern uint64_t dump_start;
 
 void tick() {
   if (main_time == 0) {
-    std::cout << "dump_start " << dump_start << ", start_time " << start_time << "\n";
+    std::cout << "dump_start " << dump_start << ", start_time " << start_time << ", main_time " << main_time << "\n";
   }
   mmio_t *m, *d;
   assert(m = dynamic_cast<mmio_t*>(master.get()));
@@ -148,7 +148,10 @@ void tick() {
 
   top->eval();
 #if VM_TRACE
-  if ((tfp) && (main_time - start_time) > dump_start*2) tfp->dump((double) main_time);
+  if ((tfp) && (main_time - start_time) > dump_start*2)  {
+    std::cout << "comp failed, printing main_time: " << main_time ", dump_start: " << dump_start << "\n";
+    tfp->dump((double) main_time);
+  }
 #endif // VM_TRACE
   main_time++;
 
