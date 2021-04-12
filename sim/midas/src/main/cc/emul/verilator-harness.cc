@@ -20,10 +20,12 @@ extern Vverilator_top* top;
 #if VM_TRACE
 extern VerilatedFstC* tfp;
 extern uint64_t dump_start;
-std::cout << "dump_start" << dump_start;
 #endif // VM_TRACE
 
 void tick() {
+  if (main_time == 0) {
+    std::cout << "dump_start " << dump_start << ", start_time " << start_time << "\n";
+  }
   mmio_t *m, *d;
   assert(m = dynamic_cast<mmio_t*>(master.get()));
   assert(d = dynamic_cast<mmio_t*>(dma.get()));
