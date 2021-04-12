@@ -19,6 +19,7 @@ extern Vverilator_top* top;
 #if VM_TRACE
 extern VerilatedFstC* tfp;
 extern uint64_t dump_start;
+std::cout << "dump_start" << dump_start;
 #endif // VM_TRACE
 
 void tick() {
