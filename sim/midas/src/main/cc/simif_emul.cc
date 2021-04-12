@@ -57,6 +57,7 @@ void simif_emul_t::init(int argc, char** argv, bool log) {
   std::string loadmem;
   bool fastloadmem = false;
   bool dramsim = false;
+  long int dump-start= 0;
   uint64_t memsize = 1L << MEM_ADDR_BITS;
   for (auto arg: args) {
     if (arg.find("+waveform=") == 0) {
@@ -77,9 +78,12 @@ void simif_emul_t::init(int argc, char** argv, bool log) {
     if (arg.find("+fuzz-host-timing=") == 0) {
       maximum_host_delay = atoi(arg.c_str() + 18);
     }
+    if (arg.find("+dump-start=") == 0) {
+      dump-start = atoi(arg.c_str() + 12);
+    }
   }
 
-  ::init(memsize, dramsim);
+  ::init(memsize, dramsim, dump-start);
   if (fastloadmem && !loadmem.empty()) {
     fprintf(stdout, "[fast loadmem] %s\n", loadmem.c_str());
     ::load_mems(loadmem.c_str());

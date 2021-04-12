@@ -17,6 +17,7 @@ extern std::unique_ptr<mm_t> slave[MEM_NUM_CHANNELS];
 extern Vverilator_top* top;
 #if VM_TRACE
 extern VerilatedFstC* tfp;
+extern long int dump-start;
 #endif // VM_TRACE
 
 void tick() {
@@ -142,6 +143,7 @@ void tick() {
 
   top->eval();
 #if VM_TRACE
+
   if (tfp) tfp->dump((double) main_time);
 #endif // VM_TRACE
   main_time++;
@@ -149,7 +151,7 @@ void tick() {
   top->clock = 0;
   top->eval(); // This shouldn't do much
 #if VM_TRACE
-  if (tfp) tfp->dump((double) main_time);
+  if ((tfp) && main_time > dump-start*2) tfp->dump((double) main_time);
 #endif // VM_TRACE
   main_time++;
 
