@@ -6,7 +6,7 @@
 #include <cmath>
 #include <verilated.h>
 #if VM_TRACE
-#include <verilated_vcd_c.h>
+#include <verilated_fst_c.h>
 #endif // VM_TRACE
 
 extern uint64_t main_time;
@@ -16,7 +16,7 @@ extern std::unique_ptr<mm_t> slave[MEM_NUM_CHANNELS];
 
 extern Vverilator_top* top;
 #if VM_TRACE
-extern VerilatedVcdC* tfp;
+extern VerilatedFstC* tfp;
 #endif // VM_TRACE
 
 void tick() {

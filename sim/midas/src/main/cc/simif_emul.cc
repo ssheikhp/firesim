@@ -7,7 +7,7 @@
 #else
 #include <verilated.h>
 #if VM_TRACE
-#include <verilated_vcd_c.h>
+#include <verilated_fst_c.h>
 #endif
 #endif
 #include <signal.h>
@@ -24,7 +24,7 @@ bool vcs_fin = false;
 #else
 Vverilator_top* top = NULL;
 #if VM_TRACE
-VerilatedVcdC* tfp = NULL;
+VerilatedFstC* tfp = NULL;
 #endif // VM_TRACE
 double sc_time_stamp() {
   return (double) main_time;
@@ -53,7 +53,7 @@ simif_emul_t::~simif_emul_t() { }
 void simif_emul_t::init(int argc, char** argv, bool log) {
   // Parse args
   std::vector<std::string> args(argv + 1, argv + argc);
-  std::string waveform = "dump.vcd";
+  std::string waveform = "dump.fst";
   std::string loadmem;
   bool fastloadmem = false;
   bool dramsim = false;
@@ -99,7 +99,7 @@ void simif_emul_t::init(int argc, char** argv, bool log) {
 
   top = new Vverilator_top;
 #if VM_TRACE                         // If emul was invoked with --trace
-  tfp = new VerilatedVcdC;
+  tfp = new VerilatedFstC;
   Verilated::traceEverOn(true);      // Verilator must compute traced signals
   VL_PRINTF("Enabling waves: %s\n", waveform.c_str());
   top->trace(tfp, 99);                // Trace 99 levels of hierarchy

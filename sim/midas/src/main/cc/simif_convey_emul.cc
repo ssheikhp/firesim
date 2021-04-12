@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <verilated.h>
 #if VM_TRACE
-#include <verilated_vcd_c.h>
+#include <verilated_fst_c.h>
 #endif
 #include <signal.h>
 
@@ -57,7 +57,7 @@ void simif_convey_emul_t::init(int argc, char** argv, bool log) {
 
   top = new VWolverineShim;
 #if VM_TRACE                         // If emul was invoked with --trace
-  tfp = new VerilatedVcdC;
+  tfp = new VerilatedFstC;
   Verilated::traceEverOn(true);      // Verilator must compute traced signals
   VL_PRINTF("Enabling waves: %s\n", waveform.c_str());
   top->trace(tfp, 99);                // Trace 99 levels of hierarchy

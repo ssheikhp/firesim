@@ -44,7 +44,7 @@ $(OUT_DIR)/V$(DESIGN): $(verilator_v) $(verilator_cc) $(emul_h)
 $(OUT_DIR)/V$(DESIGN)-debug: $(verilator_v) $(verilator_cc) $(emul_h)
 	mkdir -p $(OUT_DIR)
 	rm -rf $(GEN_DIR)/V$(DESIGN)-debug.csrc
-	$(VERILATOR) $(VERILATOR_FLAGS) --trace -Mdir $(GEN_DIR)/V$(DESIGN)-debug.csrc \
+	$(VERILATOR) $(VERILATOR_FLAGS) --trace-fst -Mdir $(GEN_DIR)/V$(DESIGN)-debug.csrc \
 	-CFLAGS "-include $(GEN_DIR)/V$(DESIGN)-debug.csrc/V$(top_module).h" \
 	-o $@ $(verilator_v) $(verilator_conf) $(verilator_cc)
 	$(MAKE) -C $(GEN_DIR)/V$(DESIGN)-debug.csrc -f V$(top_module).mk
