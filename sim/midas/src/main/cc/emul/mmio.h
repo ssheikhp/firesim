@@ -98,8 +98,8 @@ private:
   bool write_inflight;
   std::vector<char> dummy_data;
 };
-void init(uint64_t memsize, bool dram, uint64_t dump-start);
+void init(uint64_t memsize, bool dram, uint64_t dump_start_par);
 void load_mems(const char *fname);
-extern uint64_t dump-start;
+extern uint64_t dump_start;
 
 #endif // __MMIO_H

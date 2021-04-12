@@ -83,7 +83,7 @@ void simif_emul_t::init(int argc, char** argv, bool log) {
     }
   }
 
-  ::init(memsize, dramsim, dump-start);
+  ::init(memsize, dramsim, dump_start);
   if (fastloadmem && !loadmem.empty()) {
     fprintf(stdout, "[fast loadmem] %s\n", loadmem.c_str());
     ::load_mems(loadmem.c_str());
