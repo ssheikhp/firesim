@@ -11,6 +11,7 @@
 #endif
 #endif
 #include <signal.h>
+#include <iostream>
 
 uint64_t main_time = 0;
 std::unique_ptr<mmio_t> master;
@@ -79,7 +80,7 @@ void simif_emul_t::init(int argc, char** argv, bool log) {
       maximum_host_delay = atoi(arg.c_str() + 18);
     }
     if (arg.find("+dump-start=") == 0) {
-      cout << "Logging with dump start \n";
+      std::cout << "Logging with dump start \n";
       dump_start = atoi(arg.c_str() + 12);
     }
   }
