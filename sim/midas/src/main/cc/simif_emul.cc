@@ -57,7 +57,7 @@ void simif_emul_t::init(int argc, char** argv, bool log) {
   std::string loadmem;
   bool fastloadmem = false;
   bool dramsim = false;
-  long int dump-start= 0;
+  uint64_t dump_start= 0;
   uint64_t memsize = 1L << MEM_ADDR_BITS;
   for (auto arg: args) {
     if (arg.find("+waveform=") == 0) {
@@ -79,7 +79,7 @@ void simif_emul_t::init(int argc, char** argv, bool log) {
       maximum_host_delay = atoi(arg.c_str() + 18);
     }
     if (arg.find("+dump-start=") == 0) {
-      dump-start = atoi(arg.c_str() + 12);
+      dump_start = atoi(arg.c_str() + 12);
     }
   }
 
