@@ -149,7 +149,7 @@ void tick() {
   top->eval();
 #if VM_TRACE
   if ((tfp) && (main_time - start_time) > dump_start*2)  {
-    std::cout << "comp failed, printing main_time: " << main_time ", dump_start: " << dump_start << "\n";
+    std::cout << "comp failed, printing main_time: " << main_time << ", dump_start: " << dump_start << "\n";
     tfp->dump((double) main_time);
   }
 #endif // VM_TRACE
