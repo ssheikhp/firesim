@@ -6,6 +6,7 @@
 #include <cmath>
 #include <verilated.h>
 #if VM_TRACE
+#include <iostream>
 #include <verilated_fst_c.h>
 #endif // VM_TRACE
 
