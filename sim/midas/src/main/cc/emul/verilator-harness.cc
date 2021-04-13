@@ -6,12 +6,10 @@
 #include <cmath>
 #include <verilated.h>
 #if VM_TRACE
-#include <iostream>
 #include <verilated_fst_c.h>
 #endif // VM_TRACE
 
 extern uint64_t main_time;
-uint64_t start_time = main_time;
 extern std::unique_ptr<mmio_t> master;
 extern std::unique_ptr<mmio_t> dma;
 extern std::unique_ptr<mm_t> slave[MEM_NUM_CHANNELS];
@@ -20,12 +18,10 @@ extern Vverilator_top* top;
 #if VM_TRACE
 extern VerilatedFstC* tfp;
 extern uint64_t dump_start;
+uint64_t start_time = 300000; //Experimentally found
 #endif // VM_TRACE
 
 void tick() {
-  if (main_time == 0) {
-    std::cout << "dump_start " << dump_start << ", start_time " << start_time << ", main_time " << main_time << "\n";
-  }
   mmio_t *m, *d;
   assert(m = dynamic_cast<mmio_t*>(master.get()));
   assert(d = dynamic_cast<mmio_t*>(dma.get()));
@@ -149,7 +145,6 @@ void tick() {
   top->eval();
 #if VM_TRACE
   if ((tfp) && (main_time - start_time) > dump_start*2)  {
-    std::cout << "comp failed, printing main_time: " << main_time << ", dump_start: " << dump_start << "\n";
     tfp->dump((double) main_time);
   }
 #endif // VM_TRACE
