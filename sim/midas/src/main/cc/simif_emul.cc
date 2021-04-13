@@ -92,6 +92,7 @@ void simif_emul_t::init(int argc, char** argv, bool log) {
   }
 
   signal(SIGTERM, handle_sigterm);
+  signal(SIGINT, handle_sigterm);
 #ifdef VCS
   host = context_t::current();
   target_args_t *targs = new target_args_t(argc, argv);
