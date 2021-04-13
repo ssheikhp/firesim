@@ -18,6 +18,7 @@ extern Vverilator_top* top;
 #if VM_TRACE
 extern VerilatedFstC* tfp;
 extern uint64_t dump_start;
+uint64_t start_time = 300000; //Experimentally found
 #endif // VM_TRACE
 
 void tick() {
@@ -143,14 +144,16 @@ void tick() {
 
   top->eval();
 #if VM_TRACE
-  if (tfp) tfp->dump((double) main_time);
+  if ((tfp) && (main_time - start_time) > dump_start*2)  {
+    tfp->dump((double) main_time);
+  }
 #endif // VM_TRACE
   main_time++;
 
   top->clock = 0;
   top->eval(); // This shouldn't do much
 #if VM_TRACE
-  if (tfp) tfp->dump((double) main_time);
+  if ((tfp) && (main_time - start_time) > dump_start*2) tfp->dump((double) main_time);
 #endif // VM_TRACE
   main_time++;
 
