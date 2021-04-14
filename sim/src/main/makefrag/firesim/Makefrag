@@ -183,7 +183,7 @@ run-verilator: $(verilator)
 
 run-verilator-debug: $(verilator_debug)
 	cd $(dir $<) && \
-	$(verilator_debug) +permissive $(verilator_args) +waveform=$(sim_binary_basename).vpd $(COMMON_SIM_ARGS) $(MIDAS_LEVEL_SIM_ARGS) $(EXTRA_SIM_ARGS) +permissive-off $(abspath $(SIM_BINARY)) \
+	$(verilator_debug) +permissive $(verilator_args) +waveform=$(sim_binary_basename).fst $(COMMON_SIM_ARGS) $(MIDAS_LEVEL_SIM_ARGS) $(EXTRA_SIM_ARGS) +permissive-off $(abspath $(SIM_BINARY)) \
 	$(disasm) $(sim_binary_basename).out
 
 run-vcs: $(vcs)

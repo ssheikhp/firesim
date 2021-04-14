@@ -26,6 +26,7 @@ bool vcs_fin = false;
 Vverilator_top* top = NULL;
 #if VM_TRACE
 VerilatedFstC* tfp = NULL;
+std::string* tfp_file_name;
 #endif // VM_TRACE
 double sc_time_stamp() {
   return (double) main_time;
@@ -110,6 +111,7 @@ void simif_emul_t::init(int argc, char** argv, bool log) {
   VL_PRINTF("Enabling waves: %s\n", waveform.c_str());
   top->trace(tfp, 99);                // Trace 99 levels of hierarchy
   tfp->open(waveform.c_str());        // Open the dump file
+  tfp_file_name = new std::string(waveform);
 #endif // VM_TRACE
 
   top->reset = 1;
