@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cmath>
 #include <verilated.h>
+#include <sstream>
 #if VM_TRACE
 #include <verilated_fst_c.h>
 #endif // VM_TRACE
@@ -17,6 +18,8 @@ extern std::unique_ptr<mm_t> slave[MEM_NUM_CHANNELS];
 extern Vverilator_top* top;
 #if VM_TRACE
 extern VerilatedFstC* tfp;
+extern std::string* tfp_file_name;
+#define TRACE_CHUNK_SIZE 100000
 extern uint64_t dump_start;
 #endif // VM_TRACE
 
@@ -143,14 +146,22 @@ void tick() {
 
   top->eval();
 #if VM_TRACE
-  if ((tfp) && (main_time > dump_start*2) ) tfp->dump((double) main_time);
+  if(main_time%(TRACE_CHUNK_SIZE*2)==0){
+    if(main_time!=0){
+        tfp->close();
+        std::ostringstream os;
+        os << *tfp_file_name << main_time/2;
+        tfp->open(os.str().c_str());
+    }
+  }
+  if (tfp) tfp->dump((double) main_time);
 #endif // VM_TRACE
   main_time++;
 
   top->clock = 0;
   top->eval(); // This shouldn't do much
 #if VM_TRACE
-  if ((tfp) && (main_time > dump_start*2)) tfp->dump((double) main_time);
+  if (tfp) tfp->dump((double) main_time);
 #endif // VM_TRACE
   main_time++;
 
