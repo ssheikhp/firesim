@@ -55,7 +55,8 @@ package object passes {
       params = Nil)
 
     val impl =
-      s"""|`ifndef ${blackboxName.toUpperCase()}
+      s"""|`ifdef VERILATOR
+          |`ifndef ${blackboxName.toUpperCase()}
           |`define ${blackboxName.toUpperCase()}
           |module ${blackboxName}(
           |  input      I,
@@ -69,6 +70,7 @@ package object passes {
           |  assign O = (I & enable);
           |  /* verilator lint_on COMBDLY */
           |endmodule
+          |`endif
           |`endif
           |""".stripMargin
 
