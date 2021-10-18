@@ -36,17 +36,20 @@ simif_u250_t::simif_u250_t(int argc, char** argv) {
     xsim_to_driver_fd = open(xsim_to_driver, O_RDONLY);
 #else
     slot_id = -1;
+    xdma_id = 0;
     std::vector<std::string> args(argv + 1, argv + argc);
     for (auto &arg: args) {
         if (arg.find("+slotid=") == 0) {
             slot_id = strtol((arg.c_str()) + 8, NULL, 16);
+        } else if (arg.find("+xdmaid=") == 0) {
+            xdma_id = strtol((arg.c_str()) + 8, NULL, 10);
         }
     }
     if (slot_id == -1) {
         fprintf(stderr, "Slot ID not specified. Assuming Slot 0\n");
         slot_id = 0;
     }
-    fpga_setup(slot_id);
+    fpga_setup(slot_id, xdma_id);
 #endif
 }
 
@@ -72,7 +75,7 @@ void simif_u250_t::fpga_shutdown() {
 #endif
 }
 
-void simif_u250_t::fpga_setup(int slot_id) {
+void simif_u250_t::fpga_setup(int slot_id, int xdma_id) {
 #ifndef SIMULATION_XSIM
     int domain = 0;
     int device_id = 0;
@@ -118,9 +121,9 @@ void simif_u250_t::fpga_setup(int slot_id) {
     char device_file_name[256];
     char device_file_name2[256];
 
-    sprintf(device_file_name, "/dev/xdma%d_h2c_0", slot_id);
+    sprintf(device_file_name, "/dev/xdma%d_h2c_0", xdma_id);
     printf("Using xdma write queue: %s\n", device_file_name);
-    sprintf(device_file_name2, "/dev/xdma%d_c2h_0", slot_id);
+    sprintf(device_file_name2, "/dev/xdma%d_c2h_0", xdma_id);
     printf("Using xdma read queue: %s\n", device_file_name2);
 
 
