@@ -7,6 +7,7 @@
 #include "bridges/uart.h"
 #include "bridges/simplenic.h"
 #include "bridges/blockdev.h"
+#include "bridges/generictrace.h"
 #include "bridges/tracerv.h"
 #include "bridges/groundtest.h"
 #include "bridges/autocounter.h"
@@ -250,6 +251,57 @@ firesim_top_t::firesim_top_t(int argc, char** argv)
     #ifdef SIMPLENICBRIDGEMODULE_7_PRESENT
     SIMPLENICBRIDGEMODULE_7_substruct_create;
     add_bridge_driver(new simplenic_t(this, args, SIMPLENICBRIDGEMODULE_7_substruct, 7, SIMPLENICBRIDGEMODULE_7_DMA_ADDR));
+    #endif
+#endif
+
+#ifdef GENERICTRACEBRIDGEMODULE_struct_guard
+    #ifdef GENERICTRACEBRIDGEMODULE_0_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 0)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_1_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 1)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_2_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 2)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_3_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 3)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_4_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 4)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_5_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 5)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_6_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 6)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_7_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 7)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_8_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 8)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_9_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 9)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_10_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 10)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_11_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 11)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_12_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 12)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_13_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 13)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_14_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 14)
+    #endif
+    #ifdef GENERICTRACEBRIDGEMODULE_15_PRESENT
+    INSTANTIATE_GENERICTRACE(add_bridge_driver, 15)
     #endif
 #endif
 
