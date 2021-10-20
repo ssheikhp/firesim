@@ -130,25 +130,25 @@ public:
 };
 
 
-class interval_plus_profiler : public base_profiler {
+class tip_profiler : public base_profiler {
 private:
   unsigned int const aggregate_magic[5] = {60,  30,  20,  15, 12};
   struct genericTraceToken512 lastRetired = {};
   bool deferred = false;
 public:
-  interval_plus_profiler(std::vector<std::string> &args, struct traceInfo info);
-  ~interval_plus_profiler();
+  tip_profiler(std::vector<std::string> &args, struct traceInfo info);
+  ~tip_profiler();
   void flushResult();
   void tick(char const * const data, unsigned int tokens);
 };
 
 
-class interval_profiler : public base_profiler {
+class tip_noilp_profiler : public base_profiler {
 private:
   struct genericTraceToken512 lastRetired = {};
   bool deferred = false;
 public:
-  interval_profiler(std::vector<std::string> &args, struct traceInfo info);
+  tip_noilp_profiler(std::vector<std::string> &args, struct traceInfo info);
   void tick(char const * const data, unsigned int tokens);
 };
 

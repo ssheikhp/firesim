@@ -158,31 +158,31 @@ private:
     // Add you workers here:
     std::map<std::string,
              std::function<std::shared_ptr<generictrace_worker>(std::vector<std::string> &, struct traceInfo &)>> workerRegister = {
-        {"dummy",    [](std::vector<std::string> &args, struct traceInfo &info){
+        {"dummy",     [](std::vector<std::string> &args, struct traceInfo &info){
                       (void) args; return std::make_shared<generictrace_worker>(info);
                   }},
-        {"file",     [](std::vector<std::string> &args, struct traceInfo &info){
+        {"file",      [](std::vector<std::string> &args, struct traceInfo &info){
                       return std::make_shared<generictrace_filedumper>(args, info);
                   }},
-        {"oracle",   [](std::vector<std::string> &args, struct traceInfo &info){
+        {"oracle",    [](std::vector<std::string> &args, struct traceInfo &info){
                       return std::make_shared<oracle_profiler>(args, info);
                   }},
-        {"intervalplus", [](std::vector<std::string> &args, struct traceInfo &info){
-                      return std::make_shared<interval_plus_profiler>(args, info);
+        {"tip",       [](std::vector<std::string> &args, struct traceInfo &info){
+                      return std::make_shared<tip_profiler>(args, info);
                   }},
-        {"interval", [](std::vector<std::string> &args, struct traceInfo &info){
-                      return std::make_shared<interval_profiler>(args, info);
+        {"tip_noilp", [](std::vector<std::string> &args, struct traceInfo &info){
+                      return std::make_shared<tip_noilp_profiler>(args, info);
                   }},
-        {"lynsyn",   [](std::vector<std::string> &args, struct traceInfo &info){
+        {"lynsyn",    [](std::vector<std::string> &args, struct traceInfo &info){
                       return std::make_shared<lynsyn_profiler>(args, info);
                   }},
-        {"pebsplus",     [](std::vector<std::string> &args, struct traceInfo &info){
+        {"pebsplus",  [](std::vector<std::string> &args, struct traceInfo &info){
                       return std::make_shared<pebs_plus_profiler>(args, info);
                   }},
-        {"pebs",     [](std::vector<std::string> &args, struct traceInfo &info){
+        {"pebs",      [](std::vector<std::string> &args, struct traceInfo &info){
                       return std::make_shared<pebs_profiler>(args, info);
                   }},
-        {"ibs",      [](std::vector<std::string> &args, struct traceInfo &info){
+        {"ibs",       [](std::vector<std::string> &args, struct traceInfo &info){
                       return std::make_shared<ibs_profiler>(args, info);
                   }}
     };

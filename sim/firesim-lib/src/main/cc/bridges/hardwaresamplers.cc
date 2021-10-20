@@ -364,15 +364,15 @@ void oracle_profiler::tick(char const * const data, unsigned int tokens) {
 }
 
 
-interval_plus_profiler::interval_plus_profiler(std::vector<std::string> &args, struct traceInfo info)
-  : base_profiler(args, info, "IntervalPlusProfiler@" + std::to_string(info.tracerId), true)  {
+tip_profiler::tip_profiler(std::vector<std::string> &args, struct traceInfo info)
+  : base_profiler(args, info, "TIPProfiler@" + std::to_string(info.tracerId), true)  {
   if (samplingPeriod == 0) {
     throw std::invalid_argument("sampling period missing or too low");
   }
   flushHeader();
 }
 
-void interval_plus_profiler::flushResult() {
+void tip_profiler::flushResult() {
   for (auto &r: result) {
     fprintf(csvFile, "0x%lx;%f;%ld;%ld;%ld;%ld;%ld;%ld;%ld;%ld;%ld;%ld;%ld\n",
             r.first,
@@ -392,7 +392,7 @@ void interval_plus_profiler::flushResult() {
   result.clear();
 }
 
-interval_plus_profiler::~interval_plus_profiler() {
+tip_profiler::~tip_profiler() {
   // We need to call this method from the destructor of the derived class
   // because we have overwritten it and base_profiler would just call
   // its own as we are already destructed when base_profiler destructs
@@ -400,7 +400,7 @@ interval_plus_profiler::~interval_plus_profiler() {
 }
 
 
-void interval_plus_profiler::tick(char const * const data, unsigned int tokens) {
+void tip_profiler::tick(char const * const data, unsigned int tokens) {
   struct genericTraceToken512 const * const trace = (struct genericTraceToken512 *) data;
   for (unsigned int i = 0; i < tokens; i ++) {
     struct genericTraceToken512 const token = trace[i];
@@ -558,14 +558,14 @@ void interval_plus_profiler::tick(char const * const data, unsigned int tokens) 
   }
 }
 
-interval_profiler::interval_profiler(std::vector<std::string> &args, struct traceInfo info)
-  : base_profiler(args, info, "IntervalProfiler@" + std::to_string(info.tracerId)) {
+tip_noilp_profiler::tip_noilp_profiler(std::vector<std::string> &args, struct traceInfo info)
+  : base_profiler(args, info, "TIPnoILPProfiler@" + std::to_string(info.tracerId)) {
   if (samplingPeriod == 0) {
     throw std::invalid_argument("sampling period missing or too low");
   }
 }
 
-void interval_profiler::tick(char const * const data, unsigned int tokens) {
+void tip_noilp_profiler::tick(char const * const data, unsigned int tokens) {
   struct genericTraceToken512 const * const trace = (struct genericTraceToken512 *) data;
   for (unsigned int i = 0; i < tokens; i ++) {
     struct genericTraceToken512 const token = trace[i];
