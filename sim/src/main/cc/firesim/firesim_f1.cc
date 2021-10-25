@@ -1,5 +1,5 @@
 //See LICENSE for license details
-#if defined(PLATFORM_f1) || defined(RTLSIM)
+#if defined(PLATFORM_f1)
 #ifndef RTLSIM
 #include "simif_f1.h"
 #else

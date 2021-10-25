@@ -1,15 +1,28 @@
 //See LICENSE for license details
 #if defined(PLATFORM_u250)
+#ifndef RTLSIM
 #include "simif_u250.h"
+#else
+#include "simif_emul.h"
+#endif
 #include "firesim_top.h"
 #include <exception>
 #include <stdio.h>
 
 // top for RTL sim
 class firesim_u250_t:
-    public simif_u250_t, public firesim_top_t {
+#ifdef RTLSIM
+    public simif_emul_t, public firesim_top_t
+#else
+    public simif_u250_t, public firesim_top_t
+#endif
+{
     public:
+#ifdef RTLSIM
+        firesim_u250_t(int argc, char** argv): firesim_top_t(argc, argv) {};
+#else
         firesim_u250_t(int argc, char** argv): simif_u250_t(argc, argv), firesim_top_t(argc, argv) {};
+#endif
 };
 
 int main(int argc, char** argv) {
