@@ -15,7 +15,7 @@ class simif_u250_t: public virtual simif_t
     uint32_t is_write_ready();
     void check_rc(int rc, char * infostr);
     void fpga_shutdown();
-    void fpga_setup(int slot_id, int xdma_id);
+    void fpga_setup(int slot_id);
   private:
     void * fpga_pci_bar_get_mem_at_offset(uint64_t offset);
     int fpga_pci_poke(uint64_t offset, uint32_t value);
@@ -30,7 +30,6 @@ class simif_u250_t: public virtual simif_t
 #else
 //    int rc;
     int slot_id;
-    int xdma_id;
     int edma_write_fd;
     int edma_read_fd;
     void* bar0_base;

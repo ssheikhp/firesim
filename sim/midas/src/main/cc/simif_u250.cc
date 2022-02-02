@@ -8,6 +8,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #define PCI_DEV_FMT "%04x:%02x:%02x.%d"
 int bar0_size = 0x2000000; // 32 MB
@@ -36,20 +37,17 @@ simif_u250_t::simif_u250_t(int argc, char** argv) {
     xsim_to_driver_fd = open(xsim_to_driver, O_RDONLY);
 #else
     slot_id = -1;
-    xdma_id = 0;
     std::vector<std::string> args(argv + 1, argv + argc);
     for (auto &arg: args) {
         if (arg.find("+slotid=") == 0) {
             slot_id = strtol((arg.c_str()) + 8, NULL, 16);
-        } else if (arg.find("+xdmaid=") == 0) {
-            xdma_id = strtol((arg.c_str()) + 8, NULL, 10);
         }
     }
     if (slot_id == -1) {
         fprintf(stderr, "Slot ID not specified. Assuming Slot 0\n");
         slot_id = 0;
     }
-    fpga_setup(slot_id, xdma_id);
+    fpga_setup(slot_id);
 #endif
 }
 
@@ -75,7 +73,7 @@ void simif_u250_t::fpga_shutdown() {
 #endif
 }
 
-void simif_u250_t::fpga_setup(int slot_id, int xdma_id) {
+void simif_u250_t::fpga_setup(int slot_id) {
 #ifndef SIMULATION_XSIM
     int domain = 0;
     int device_id = 0;
@@ -117,9 +115,32 @@ void simif_u250_t::fpga_setup(int slot_id, int xdma_id) {
     close(fd);
     fd = -1;
 
-    // EDMA setup
+    // XDMA setup
     char device_file_name[256];
     char device_file_name2[256];
+
+    ret = snprintf(sysfs_name, sizeof(sysfs_name),
+            "/sys/bus/pci/devices/" PCI_DEV_FMT "/xdma",
+            domain, slot_id, device_id, pf_id);
+    assert(ret>=0);
+    DIR *d;
+    struct dirent *dir;
+    int xdma_id = -1;
+
+    d = opendir(sysfs_name);
+    if (d) {
+      while((dir = readdir(d)) != NULL) {
+        printf("examining xdma/%s\n", dir->d_name);
+        if(strstr(dir->d_name, "xdma")){
+            xdma_id = strtol(dir->d_name + 4, NULL, 10);
+            break;
+        }
+      }
+      closedir(d);
+    }
+
+    assert(xdma_id!=-1);
+
 
     sprintf(device_file_name, "/dev/xdma%d_h2c_0", xdma_id);
     printf("Using xdma write queue: %s\n", device_file_name);
